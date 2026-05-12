@@ -1,0 +1,9 @@
+<ul>
+    {{range .}}
+        <ol>
+            <h4>{{ .Time}}: {{ .Temperature}}</h4>
+        </ol>
+    {{else}}
+        <h4>no rows</h4>
+    {{end}}
+</ul>
