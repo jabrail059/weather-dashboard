@@ -1,5 +1,9 @@
 package models
 
+type GeoRequest struct {
+	Results []Result `json:"results"`
+}
+
 type Result struct {
 	ID        int     `json:"id"`
 	Name      string  `json:"name"`
@@ -7,15 +11,13 @@ type Result struct {
 	Longitude float64 `json:"longitude"`
 }
 
-type GeoRequest struct {
-	Results []Result `json:"results"`
+type ReqDaily struct {
+	Daily Daily `json:"daily"`
 }
 
-type ReqHourly struct {
-	Hourly Hourly `json:"hourly"`
-}
-
-type Hourly struct {
-	Time        []string  `json:"time"`
-	Temperature []float64 `json:"temperature_2m"`
+type Daily struct {
+	Time           []string  `json:"time"`
+	TemperatureMax []float64 `json:"temperature_2m_max"`
+	TemperatureMin []float64 `json:"temperature_2m_min"`
+	WeatherCode    []int     `json:"weather_code"`
 }

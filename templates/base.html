@@ -1,9 +1,13 @@
-<ul>
+<div style="display: flex; gap: 3px; flex-wrap: nowrap; width: 100%;">
     {{range .}}
-        <ol>
-            <h4>{{ .Time}}: {{ .Temperature}}</h4>
-        </ol>
-    {{else}}
-        <h4>no rows</h4>
+        <div style="margin-top: 25px;">
+            <ol>
+                <h4>{{ .Time}}</h4>
+                <h4 style="text-align: center;">{{ .TemperatureMax}}℃</h4>
+                <h4 style="text-align: center;">{{ .TemperatureMin}}℃</h4>
+                <h5>{{ .WeatherDescription}}</h5>
+                <img src="{{ .ImageSource }}" alt="">
+            </ol>
+        </div> 
     {{end}}
-</ul>
+</div>

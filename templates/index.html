@@ -3,25 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <title>Прогноз погоды</title>
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script> htmx.config.selfRequestsOnly = false </script>
+    <link rel="icon" type="image/svg+xml" href="/static/icons/weather.svg">
 </head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.sand.min.css">
     <body>
-        <table>
+        <h2 style="margin-top: 3px; text-align: center;">Прогноз погоды</h2>
+        <form hx-get="/weather" hx-target="#result">
             <input 
-            type="text"
-            placeholder="Enter a city..."
-            hx-get="/weather"
-            hx-trigger="keyup changed delay:1000ms"
-            hx-push-url="true"
-            hx-target="#result"
-            hx-indicator="#spinner"
-            name="city"
+                type="text"
+                placeholder="Введите название города..."
+                name="city"
             />
-        </table>
-        <div id="result">
-        </div>
+            <button type="submit">
+                Узнать погоду
+            </button>
+        </form>
+        <div id="result"></div>
     </body> 
 </html>
