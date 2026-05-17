@@ -8,23 +8,22 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/jabrail059/weather-dashboard/internal/utils"
+	"github.com/jabrail059/weather-dashboard/internal/service"
 	"github.com/jabrail059/weather-dashboard/internal/weather"
 )
 
 func GeocodingAPI(w http.ResponseWriter, r *http.Request) {
 	city := r.URL.Query().Get("city")
-	geocode, err, statusCode := utils.GeocodeCity(city)
+	geocode, err, statusCode := service.GeocodeCity(service.Storage(), city)
 	if err != nil {
 		http.Error(w, err.Error(), statusCode)
 		return
 	}
-	forecast, err, statusCode := utils.GetForecast(geocode.Results[0].Latitude, geocode.Results[0].Longitude)
+	forecast, err, statusCode := service.GetForecast(geocode.Results[0].Latitude, geocode.Results[0].Longitude)
 	if err != nil {
 		http.Error(w, err.Error(), statusCode)
 		return
 	}
-
 	Data := make([]struct {
 		Time               string
 		TemperatureMax     float64

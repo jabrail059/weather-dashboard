@@ -21,3 +21,10 @@ type Daily struct {
 	TemperatureMin []float64 `json:"temperature_2m_min"`
 	WeatherCode    []int     `json:"weather_code"`
 }
+
+type CityReport struct {
+	Status    string  `json:"status"`
+	City      string  `json:"city"`
+	Latitude  float64 `json:"lat"`
+	Longitude float64 `json:"lon"`
+}
