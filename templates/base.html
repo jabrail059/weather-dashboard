@@ -1,6 +1,10 @@
-<div style="display: flex; gap: 3px; flex-wrap: nowrap; width: 100%;">
-    {{range .}}
-        <div style="margin-top: 25px;">
+<button class="add-favorite" type="button" hx-post="/favorites/add?city={{ .City }}" hx-target="#favs">
+    Добавить в избранные
+</button>
+
+<div class="weather-grid">
+    {{range .Days}}
+        <div class="weather-card">
             <ol>
                 <h4>{{ .Time}}</h4>
                 <h4 style="text-align: center;">{{ .TemperatureMax}}℃</h4>
@@ -8,6 +12,6 @@
                 <h5>{{ .WeatherDescription}}</h5>
                 <img src="{{ .ImageSource }}" alt="">
             </ol>
-        </div> 
+        </div>
     {{end}}
 </div>

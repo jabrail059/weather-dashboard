@@ -12,11 +12,11 @@ import (
 	"github.com/jabrail059/weather-dashboard/storage"
 )
 
-func GeocodeCity(cityStorage storage.Storage, city string) (*models.GeoRequest, error, int) {
+func GeocodeCity(ctx context.Context, cityStorage storage.Storage, city string) (*models.GeoRequest, error, int) {
 	var geo models.GeoRequest
 	cityName := strings.TrimSpace(strings.ToLower(city))
 
-	result, err := cityStorage.Select(context.Background(), cityName)
+	result, err := cityStorage.Select(ctx, cityName)
 	if err == nil {
 		geo = models.GeoRequest{
 			Results: []models.Result{*result},
@@ -27,14 +27,21 @@ func GeocodeCity(cityStorage storage.Storage, city string) (*models.GeoRequest, 
 		return nil, fmt.Errorf("Не удалось получить данные"), http.StatusInternalServerError
 	}
 
-	resp, err := http.Get(fmt.Sprintf("https://geocoding-api.open-meteo.com/v1/search?name=%s&count=1&language=ru&format=json", url.QueryEscape(cityName)))
+	apiURL := fmt.Sprintf("https://geocoding-api.open-meteo.com/v1/search?name=%s&count=1&language=ru&format=json", url.QueryEscape(cityName))
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("Не удалось создать запрос"), http.StatusInternalServerError
+	}
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("Не удалось получить о погоде"), http.StatusBadRequest
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("Возникла ошибка при получении данных"), http.StatusBadRequest
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("Возникла ошибка при получении данных"), resp.StatusCode
 	}
 
 	if err = json.NewDecoder(resp.Body).Decode(&geo); err != nil {
@@ -44,7 +51,7 @@ func GeocodeCity(cityStorage storage.Storage, city string) (*models.GeoRequest, 
 		return nil, fmt.Errorf("Город не найден"), http.StatusNotFound
 	}
 	geo.Results[0].Name = cityName
-	err = cityStorage.Save(context.Background(), &geo.Results[0])
+	err = cityStorage.Save(ctx, &geo.Results[0])
 	if err != nil {
 		return nil, fmt.Errorf("Не удалось сохранить данные"), http.StatusInternalServerError
 	}

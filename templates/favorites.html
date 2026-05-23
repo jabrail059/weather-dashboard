@@ -1,0 +1,13 @@
+{{if .Presence}}
+<div class="favorites">
+        <h4 class="favorites-title">Избранные:</h4>
+        <div class="favorite-chips">
+            {{range .Cities}}
+                <div class="favorite-chip">
+                    <button class="favorite-city" type="button" hx-get="/weather?city={{ . }}" hx-target="#result">{{ . }}</button>
+                    <button class="favorite-remove" type="button" hx-delete="/favorites/delete?city={{ . }}" hx-target="#favs" aria-label="Remove {{ . }}">x</button>
+                </div>
+            {{end}}
+        </div>
+</div>
+{{end}}

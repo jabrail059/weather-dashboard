@@ -7,11 +7,10 @@
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script> htmx.config.selfRequestsOnly = false </script>
     <link rel="icon" type="image/svg+xml" href="/static/icons/weather.svg">
-    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.sand.min.css"> -->
-    <link rel="stylesheet" href="/static/styles/style.css">
+    <link rel="stylesheet" href="/static/styles/style.css?v=3">
 </head>
     <body>
-        <h2 style="margin-top: 3px; text-align: center;">Прогноз погоды</h2>
+        <div hx-get="/searchhistory" id="history" hx-trigger="load, searchHistoryChanged from:body" ></div>
         <form hx-get="/weather" hx-target="#result">
             <input 
                 type="text"
@@ -22,12 +21,13 @@
                 Узнать погоду
             </button>
         </form>
+        {{if .AutoDetected}}
         <form>
-            {{if .AutoDetected}}
                 <p>Возможно, вы в городе {{ .AutoCity}}</p>
                 <button type="button" hx-get="/weather" hx-target="#result" hx-vals='{"city": "{{ .AutoCity}}"}'>Показать погоду</button>
-            {{end}}
         </form>
+        {{end}}
+        <div id="favs" hx-get="/favorites" hx-trigger="load"></div>
         <div id="result"></div>
     </body> 
 </html>

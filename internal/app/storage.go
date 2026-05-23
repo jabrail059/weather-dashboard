@@ -1,8 +1,6 @@
-package service
+package app
 
-import (
-	"github.com/jabrail059/weather-dashboard/storage"
-)
+import "github.com/jabrail059/weather-dashboard/storage"
 
 var db storage.Storage
 

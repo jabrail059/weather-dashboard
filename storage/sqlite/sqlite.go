@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log/slog"
+	"time"
 
 	"github.com/jabrail059/weather-dashboard/internal/models"
 	"github.com/jabrail059/weather-dashboard/storage"
@@ -20,10 +22,13 @@ func New(connStr string) (*Storage, error) {
 		return nil, fmt.Errorf("Не удалось открыть базу данных: %w", err)
 	}
 
-	if err := db.Ping(); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	if err := db.PingContext(ctx); err != nil {
 		return nil, fmt.Errorf("Не удалось подключиться к базе данных: %w", err)
 	}
 
+	slog.Info("SQLite успешно подключен")
 	return &Storage{db: db}, nil
 }
 

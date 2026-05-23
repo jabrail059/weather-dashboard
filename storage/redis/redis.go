@@ -1,13 +1,13 @@
-package storage
+package redis
 
 import "github.com/redis/go-redis/v9"
 
 var client *redis.Client
 
-func SetRedisClient(redis *redis.Client) {
+func SetClient(redis *redis.Client) {
 	client = redis
 }
 
-func Redis() *redis.Client {
+func Client() *redis.Client {
 	return client
 }

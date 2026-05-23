@@ -1,0 +1,12 @@
+{{if .Presence}}
+<div class="searchhistory">
+        <h4 class="history-title">Недавно искали:</h4>
+        <div class="history-chips">
+            {{range .Cities}}
+                <div class="history-chip">
+                    <h5>{{ . }}</h5>
+                </div>
+            {{end}}
+        </div>
+</div>
+{{end}}

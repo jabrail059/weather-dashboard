@@ -1,11 +1,14 @@
 package handlers
 
 import (
-	"html/template"
+	"context"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/jabrail059/weather-dashboard/internal/service"
+	"github.com/jabrail059/weather-dashboard/internal/session"
+	"github.com/jabrail059/weather-dashboard/internal/view"
 )
 
 func MainPage(w http.ResponseWriter, r *http.Request) {
@@ -17,21 +20,21 @@ func MainPage(w http.ResponseWriter, r *http.Request) {
 		AutoCity     string
 		AutoDetected bool
 	}{}
-	report, err := service.GetCityByIP(ip)
+
+	ctx, cancel := context.WithTimeout(r.Context(), time.Second*15)
+	defer cancel()
+
+	report, err := service.GetCityByIP(ctx, ip)
 	if err == nil && report.Status == "success" {
 		data.AutoCity = report.City
 		data.AutoDetected = true
 	}
 
-	tmpl, err := template.ParseFiles("templates/index.html")
-	if err != nil {
-		http.Error(w, "Ошибка шабонизации страницы", http.StatusInternalServerError)
-		return
-	}
+	cookie := session.GetOrCreate(r)
+	http.SetCookie(w, cookie)
 
-	err = tmpl.Execute(w, data)
-	if err != nil {
-		http.Error(w, "Ошибка рендеринга страницы", http.StatusInternalServerError)
+	if err := view.RenderTemplate(w, "index.html", data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }

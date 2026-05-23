@@ -28,3 +28,16 @@ type CityReport struct {
 	Latitude  float64 `json:"lat"`
 	Longitude float64 `json:"lon"`
 }
+
+type CitiesData struct {
+	Cities   []string
+	Presence bool
+}
+
+type DayWeather struct {
+	Time               string
+	TemperatureMax     float64
+	TemperatureMin     float64
+	WeatherDescription string
+	ImageSource        string
+}

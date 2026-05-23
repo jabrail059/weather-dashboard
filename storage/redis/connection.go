@@ -1,23 +1,24 @@
-package main
+package redis
 
 import (
 	"context"
 	"fmt"
 	"log/slog"
+	"time"
 
-	"github.com/jabrail059/weather-dashboard/storage"
 	"github.com/redis/go-redis/v9"
 )
 
-var ctx = context.Background()
-
-func RedisConnection() error {
+func Connection() error {
 	client := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",
 		DB:       0,
 	})
-	storage.SetRedisClient(client)
+	SetClient(client)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 
 	if _, err := client.Ping(ctx).Result(); err != nil {
 		return fmt.Errorf("Не удалось подключиться к Redis")

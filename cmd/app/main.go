@@ -6,13 +6,14 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/jabrail059/weather-dashboard/internal/app"
 	"github.com/jabrail059/weather-dashboard/internal/handlers"
-	"github.com/jabrail059/weather-dashboard/internal/service"
+	"github.com/jabrail059/weather-dashboard/storage/redis"
 	"github.com/jabrail059/weather-dashboard/storage/sqlite"
 )
 
 func main() {
-	if err := RedisConnection(); err != nil {
+	if err := redis.Connection(); err != nil {
 		log.Fatal(err.Error())
 	}
 
@@ -24,11 +25,15 @@ func main() {
 	if err != nil {
 		log.Fatal("Не удалось подключиться к sqlite")
 	}
-	service.SetStorage(cityStorage)
+	app.SetStorage(cityStorage)
 
 	r := chi.NewRouter()
 	r.Get("/", handlers.MainPage)
-	r.Get("/weather", handlers.GeocodingAPI)
+	r.Get("/weather", handlers.Weather)
+	r.Post("/favorites/add", handlers.AddInFavorites)
+	r.Get("/favorites", handlers.GetFavorites)
+	r.Delete("/favorites/delete", handlers.DeleteFromFavorites)
+	r.Get("/searchhistory", handlers.SearchHistory)
 
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 
