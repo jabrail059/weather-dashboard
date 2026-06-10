@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Почасовой прогноз</title>
+    <link rel="stylesheet" href="/static/styles/style.css?v=5">
+</head>
+<body class="hourly-page">
+    <header class="hourly-header">
+        <h1 class="hourly-title">Почасовой прогноз</h1>
+
+        <a href="/" class="inline-btn">← На главную</a>
+
+        <div class="hourly-meta">
+            <p class="hourly-city">{{ .City }}</p>
+            <span class="hourly-dot"></span>
+            <p class="hourly-date">{{ .Date }}</p>
+        </div>
+    </header>
+    
+
+    {{template "hourlybase.html" .}}
+</body>
+</html>

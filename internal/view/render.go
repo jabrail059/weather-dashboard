@@ -39,3 +39,20 @@ func RenderPartOfTemplate(w http.ResponseWriter, fileName string, data interface
 	}
 	return nil
 }
+
+func RenderSeveralTemplates(w http.ResponseWriter, firstFileName string, secondFileName string, data interface{}) error {
+	firstPath := fmt.Sprintf("templates/%s", firstFileName)
+	secondPath := fmt.Sprintf("templates/%s", secondFileName)
+	tmpl, err := template.ParseFiles(firstPath, secondPath)
+	if err != nil {
+		slog.Warn("Ошибка парсинга страницы: " + err.Error())
+		return fmt.Errorf("Возникла ошибка парсинга во время шаболнизации страницы")
+	}
+
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		slog.Warn(fmt.Sprintf("Ошибка шаблонизации страницы %v", err.Error()))
+		return fmt.Errorf("Возникла ошибка шаблонизации страницы")
+	}
+	return nil
+}

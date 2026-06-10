@@ -34,6 +34,7 @@ func main() {
 	r.Get("/favorites", handlers.GetFavorites)
 	r.Delete("/favorites/delete", handlers.DeleteFromFavorites)
 	r.Get("/searchhistory", handlers.SearchHistory)
+	r.Get("/weather/hourly", handlers.GetHourlyForecast)
 
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 

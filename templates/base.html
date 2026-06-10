@@ -2,9 +2,17 @@
     Добавить в избранные
 </button>
 
+<div id="current" class="current-grid" hx-swap-oob="true">
+    <h4>Погода сейчас</h4>
+    <p class="current-temp">На улице: {{ .CurrentWeather.Temperature}}℃</p>
+    <p class="feels-like">Ощущается как: {{ .CurrentWeather.ApparentTemp}}℃</p>
+    <h4>Скорость ветра: {{ .CurrentWeather.WindSpeed}} м/с</h4>
+    <img src="{{ .CurrentWeather.ImageSource}}" alt="">
+</div>
+
 <div class="weather-grid">
     {{range .Days}}
-        <div class="weather-card">
+        <button class="weather-card" type="button" onclick="window.location.href='/weather/hourly?lat={{ $.Latitude }}&lon={{ $.Longitude}}&date={{ .Date }}&city={{ $.City }}'">
             <ol>
                 <h4>{{ .Time}}</h4>
                 <h4 style="text-align: center;">{{ .TemperatureMax}}℃</h4>
@@ -12,6 +20,6 @@
                 <h5>{{ .WeatherDescription}}</h5>
                 <img src="{{ .ImageSource }}" alt="">
             </ol>
-        </div>
+        </button>
     {{end}}
 </div>

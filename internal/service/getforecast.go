@@ -11,19 +11,19 @@ import (
 	"github.com/jabrail059/weather-dashboard/storage/redis"
 )
 
-func GetForecast(ctx context.Context, latitude float64, longitude float64) (*models.ReqDaily, error, int) {
+func GetDailyForecast(ctx context.Context, latitude float64, longitude float64) (*models.Daily, error, int) {
 	var res models.ReqDaily
-	key := fmt.Sprintf("forecast:%.4f:%.4f", latitude, longitude)
+	key := fmt.Sprintf("forecast:%v:%v", latitude, longitude)
 
 	value, err := redis.Client().Get(ctx, key).Result()
 	if err == nil {
 		if err = json.Unmarshal([]byte(value), &res); err != nil {
 			return nil, fmt.Errorf("Не удалось получить данные"), http.StatusInternalServerError
 		}
-		return &res, nil, http.StatusOK
+		return &res.Daily, nil, http.StatusOK
 	}
 
-	apiURL := fmt.Sprintf("https://api.open-meteo.com/v1/forecast?latitude=%v&longitude=%v&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto", latitude, longitude)
+	apiURL := fmt.Sprintf("https://api.open-meteo.com/v1/forecast?latitude=%v&longitude=%v&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration&hourly=weather_code,temperature_2m&current=temperature_2m,apparent_temperature,wind_speed_10m,weather_code&timezone=auto", latitude, longitude)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
 	if err != nil {
@@ -41,7 +41,7 @@ func GetForecast(ctx context.Context, latitude float64, longitude float64) (*mod
 	}
 
 	if err = json.NewDecoder(resp.Body).Decode(&res); err != nil {
-		return nil, fmt.Errorf("Не удалось получить данные"), http.StatusBadRequest
+		return nil, fmt.Errorf("Не удалось декодировать данные"), http.StatusBadRequest
 	}
 
 	jsonRes, err := json.Marshal(res)
@@ -53,5 +53,33 @@ func GetForecast(ctx context.Context, latitude float64, longitude float64) (*mod
 		return nil, fmt.Errorf("Не удалось кешировать данные"), http.StatusInternalServerError
 	}
 
-	return &res, nil, http.StatusOK
+	return &res.Daily, nil, http.StatusOK
+}
+
+func GetHourlyForecast(ctx context.Context, latitude string, longitude string, date string) (*models.Hourly, error, int) {
+	var res models.ReqDaily
+	key := fmt.Sprintf("forecast:%s:%s", latitude, longitude)
+
+	value, err := redis.Client().Get(ctx, key).Result()
+	if err != nil {
+		return nil, fmt.Errorf("Отсутствуют данные о почасовой погоде"), http.StatusNotFound
+	}
+	if err := json.Unmarshal([]byte(value), &res); err != nil {
+		return nil, fmt.Errorf("Не удалось получить данные"), http.StatusInternalServerError
+	}
+	return &res.Hourly, nil, http.StatusOK
+}
+
+func GetCurrentForecast(ctx context.Context, latitude float64, longitude float64) (*models.Current, error, int) {
+	var res models.ReqDaily
+	key := fmt.Sprintf("forecast:%v:%v", latitude, longitude)
+
+	value, err := redis.Client().Get(ctx, key).Result()
+	if err != nil {
+		return nil, fmt.Errorf("Отсутствуют данные о текущей погоде"), http.StatusNotFound
+	}
+	if err := json.Unmarshal([]byte(value), &res); err != nil {
+		return nil, fmt.Errorf("Не удалось получить данные"), http.StatusInternalServerError
+	}
+	return &res.Current, nil, http.StatusOK
 }
