@@ -40,17 +40,27 @@ func BuildDayWeather(forecast *models.Daily) ([]models.DayWeather, error) {
 	return days, nil
 }
 
-func BuildHourlyWeather(forecast *models.Hourly) ([]models.HourlyWeather, error) {
+func BuildHourlyWeather(forecast *models.Hourly, sunrise string, sunset string) ([]models.HourlyWeather, error) {
 	hours := make([]models.HourlyWeather, 0)
 	for i := 0; i < len(forecast.Time); i++ {
 		parsedTime, err := time.Parse("2006-01-02T15:04", forecast.Time[i])
 		if err != nil {
 			return nil, fmt.Errorf("Возникла ошибка при преобразовании даты")
 		}
+		formattedTime := parsedTime.Format("15:04")
 		hourlyTemp := models.HourlyWeather{
-			Time:        parsedTime.Format("15:04"),
+			Time:        formattedTime,
 			Temperature: math.Round(forecast.Temperature[i]),
-			ImageSource: weather.ImageSources[forecast.WeatherCode[i]],
+		}
+
+		if forecast.WeatherCode[i] <= 2 {
+			if formattedTime <= sunrise || formattedTime >= sunset {
+				hourlyTemp.ImageSource = weather.NightImageSources[forecast.WeatherCode[i]]
+			} else {
+				hourlyTemp.ImageSource = weather.ImageSources[forecast.WeatherCode[i]]
+			}
+		} else {
+			hourlyTemp.ImageSource = weather.ImageSources[forecast.WeatherCode[i]]
 		}
 		hours = append(hours, hourlyTemp)
 	}
@@ -72,4 +82,24 @@ func BuildOneDayForecast(forecast *models.Hourly, date string) (*models.Hourly, 
 		}
 	}
 	return newForecast, nil
+}
+
+func BuildCurrentWeather(forecast *models.Current) models.CurrentWeather {
+	CurrentWeather := models.CurrentWeather{
+		Temperature:  math.Round(forecast.Temperature),
+		ApparentTemp: math.Round(forecast.ApparentTemp),
+		WindSpeed:    forecast.WindSpeed,
+	}
+
+	if forecast.WeatherCode <= 2 {
+		if forecast.IsDay != 0 {
+			CurrentWeather.ImageSource = weather.ImageSources[forecast.WeatherCode]
+		} else {
+			CurrentWeather.ImageSource = weather.NightImageSources[forecast.WeatherCode]
+		}
+	} else {
+		CurrentWeather.ImageSource = weather.ImageSources[forecast.WeatherCode]
+	}
+
+	return CurrentWeather
 }

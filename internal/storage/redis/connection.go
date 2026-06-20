@@ -6,14 +6,15 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/jabrail059/weather-dashboard/internal/config"
 	"github.com/redis/go-redis/v9"
 )
 
-func Connection() error {
+func Connection(Config *config.Config) error {
 	client := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
+		Addr:     Config.RedisAddr,
+		Password: Config.RedisPassword,
+		DB:       Config.RedisDB,
 	})
 	SetClient(client)
 
@@ -21,9 +22,17 @@ func Connection() error {
 	defer cancel()
 
 	if _, err := client.Ping(ctx).Result(); err != nil {
-		return fmt.Errorf("Не удалось подключиться к Redis")
+		return fmt.Errorf("Не удалось подключиться к Redis: %w", err)
 	}
 
 	slog.Info("Redis успешно подключен")
 	return nil
+}
+
+func Close() error {
+	if client == nil {
+		return nil
+	}
+
+	return client.Close()
 }

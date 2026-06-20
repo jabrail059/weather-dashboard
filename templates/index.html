@@ -25,13 +25,14 @@
                     Узнать погоду
                 </button>
             </form>
+            {{if .AutoDetected}}
+            <form class="geo-form">
+                    <p>Возможно, вы в городе {{ .AutoCity}}</p>
+                    <button type="button" hx-get="/weather" hx-target="#result" hx-vals='{"city": "{{ .AutoCity}}"}'>Показать погоду</button>
+            </form>
+            {{end}}
         </div>
-        {{if .AutoDetected}}
-        <form>
-                <p>Возможно, вы в городе {{ .AutoCity}}</p>
-                <button type="button" hx-get="/weather" hx-target="#result" hx-vals='{"city": "{{ .AutoCity}}"}'>Показать погоду</button>
-        </form>
-        {{end}}
+
         <div id="favs" hx-get="/favorites" hx-trigger="load"></div>
         <div id="result"></div>
     </body> 

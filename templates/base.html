@@ -12,7 +12,7 @@
 
 <div class="weather-grid">
     {{range .Days}}
-        <button class="weather-card" type="button" onclick="window.location.href='/weather/hourly?lat={{ $.Latitude }}&lon={{ $.Longitude}}&date={{ .Date }}&city={{ $.City }}'">
+        <button class="weather-card" type="button" onclick="window.location.href='/weather/hourly?lat={{ $.Latitude }}&lon={{ $.Longitude}}&date={{ .Date }}&city={{ $.City }}&sunrise={{ .Sunrise }}&sunset={{ .Sunset }}'">
             <ol>
                 <h4>{{ .Time}}</h4>
                 <h4 style="text-align: center;">{{ .TemperatureMax}}℃</h4>

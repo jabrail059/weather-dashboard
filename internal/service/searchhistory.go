@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jabrail059/weather-dashboard/internal/models"
-	"github.com/jabrail059/weather-dashboard/storage/redis"
+	"github.com/jabrail059/weather-dashboard/internal/storage/redis"
 )
 
 func AddSearchHistory(ctx context.Context, city string, cookieValue string) error {

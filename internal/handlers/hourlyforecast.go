@@ -13,6 +13,8 @@ func GetHourlyForecast(w http.ResponseWriter, r *http.Request) {
 	lat := r.URL.Query().Get("lat")
 	lon := r.URL.Query().Get("lon")
 	city := r.URL.Query().Get("city")
+	sunrise := r.URL.Query().Get("sunrise")
+	sunset := r.URL.Query().Get("sunset")
 
 	forecast, err, statusCode := service.GetHourlyForecast(r.Context(), lat, lon, date)
 	if err != nil {
@@ -25,20 +27,18 @@ func GetHourlyForecast(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hours, err := service.BuildHourlyWeather(oneDayForecast)
+	hours, err := service.BuildHourlyWeather(oneDayForecast, sunrise, sunset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	data := struct {
-		City  string
-		Date  string
-		Hours []models.HourlyWeather
-	}{
-		City:  city,
-		Date:  date,
-		Hours: hours,
+	data := models.HourlyData{
+		City:    city,
+		Date:    date,
+		Sunrise: sunrise,
+		Sunset:  sunset,
+		Hours:   hours,
 	}
 
 	if err := view.RenderSeveralTemplates(w, "hourly.html", "hourlybase.html", data); err != nil {

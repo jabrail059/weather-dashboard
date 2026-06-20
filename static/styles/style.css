@@ -690,3 +690,125 @@ img {
     margin: 10px auto;
   }
 }
+
+.hourly-hero {
+  display: grid;
+  grid-template-columns: 170px auto 170px;
+  align-items: center;
+  justify-content: center;
+  column-gap: 36px;
+
+  width: min(1150px, 100%);
+  margin: 0 auto 40px;
+}
+
+.hourly-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hourly-title {
+  margin: 0 0 24px;
+}
+
+.daylight-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  width: 160px;
+  min-height: 140px;
+  padding: 14px 12px;
+
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.66);
+  box-shadow: 0 14px 34px rgba(30, 84, 130, 0.12);
+  backdrop-filter: blur(14px);
+
+  text-align: center;
+}
+
+.daylight-chip img {
+  width: 72px;
+  height: 72px;
+  margin: 0 0 10px;
+  object-fit: contain;
+}
+
+.daylight-chip span {
+  color: #1c232a;
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.search-row {
+  position: relative;
+
+  width: min(1240px, calc(100vw - 36px));
+  margin: 0 auto 20px;
+}
+
+.search-form {
+  width: min(680px, 100%);
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.geo-form {
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  width: 260px;
+  min-height: 78px;
+  margin: 0;
+  padding: 12px 14px;
+
+  border: 1px solid rgba(255,255,255,.7);
+  border-radius: 18px;
+  background: rgba(255,255,255,.72);
+  box-shadow: 0 20px 60px rgba(30,84,130,.18);
+  backdrop-filter: blur(18px);
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.geo-form p {
+  flex: 1;
+  margin: 0;
+
+  font-size: 13px;
+  line-height: 1.2;
+  text-align: left;
+}
+
+.geo-form button {
+  width: auto;
+  min-width: 120px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 12px;
+
+  font-size: 13px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+@media (max-width: 1240px) {
+  .search-row {
+    width: min(680px, calc(100vw - 36px));
+  }
+
+  .geo-form {
+    position: static;
+    width: 100%;
+    margin-top: 16px;
+  }
+}

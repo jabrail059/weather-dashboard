@@ -7,14 +7,15 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"unicode"
 
 	"github.com/jabrail059/weather-dashboard/internal/models"
-	"github.com/jabrail059/weather-dashboard/storage"
+	"github.com/jabrail059/weather-dashboard/internal/storage"
 )
 
 func GeocodeCity(ctx context.Context, cityStorage storage.Storage, city string) (*models.GeoRequest, error, int) {
 	var geo models.GeoRequest
-	cityName := strings.TrimSpace(strings.ToLower(city))
+	cityName := normalizeCityName(city)
 
 	result, err := cityStorage.Select(ctx, cityName)
 	if err == nil {
@@ -57,4 +58,30 @@ func GeocodeCity(ctx context.Context, cityStorage storage.Storage, city string) 
 	}
 
 	return &geo, nil, http.StatusOK
+}
+
+func normalizeCityName(city string) string {
+	city = strings.TrimSpace(city)
+	city = strings.ToLower(city)
+
+	if city == "" {
+		return city
+	}
+
+	runes := []rune(city)
+
+	makeUpper := true
+	for i, r := range runes {
+		if makeUpper && unicode.IsLetter(r) {
+			runes[i] = unicode.ToUpper(r)
+			makeUpper = false
+			continue
+		}
+
+		if r == ' ' || r == '-' {
+			makeUpper = true
+		}
+	}
+
+	return string(runes)
 }

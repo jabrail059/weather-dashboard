@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/jabrail059/weather-dashboard/internal/models"
-	"github.com/jabrail059/weather-dashboard/storage"
+	"github.com/jabrail059/weather-dashboard/internal/storage"
 	_ "modernc.org/sqlite"
 )
 
@@ -52,4 +52,8 @@ func (s *Storage) Select(ctx context.Context, name string) (*models.Result, erro
 	}
 
 	return result, nil
+}
+
+func (s *Storage) Close() error {
+	return s.db.Close()
 }

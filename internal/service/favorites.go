@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jabrail059/weather-dashboard/storage/redis"
+	"github.com/jabrail059/weather-dashboard/internal/storage/redis"
 )
 
 func SaveInFavorites(ctx context.Context, session_id string, city string) error {

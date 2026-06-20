@@ -4,21 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Почасовой прогноз</title>
+    <link rel="icon" type="image/svg+xml" href="/static/icons/weather.svg">
     <link rel="stylesheet" href="/static/styles/style.css?v=5">
 </head>
 <body class="hourly-page">
     <header class="hourly-header">
-        <h1 class="hourly-title">Почасовой прогноз</h1>
+        <a
+            href="/"
+            class="inline-btn"
+            onclick="event.preventDefault(); if (history.length > 1) { history.back(); } else { window.location.href = '/'; }"
+        >
+            ← На главную
+        </a>
 
-        <a href="/" class="inline-btn">← На главную</a>
+        <div class="hourly-hero">
+            <div class="daylight-chip sunrise">
+                <img src="/static/icons/sunrise.svg" alt="">
+                <span>Восход {{ .Sunrise }}</span>
+            </div>
 
-        <div class="hourly-meta">
-            <p class="hourly-city">{{ .City }}</p>
-            <span class="hourly-dot"></span>
-            <p class="hourly-date">{{ .Date }}</p>
+            <div class="hourly-center">
+                <h1 class="hourly-title">Почасовой прогноз</h1>
+
+                <div class="hourly-meta">
+                    <p class="hourly-city">{{ .City }}</p>
+                    <span class="hourly-dot"></span>
+                    <p class="hourly-date">{{ .Date }}</p>
+                </div>
+            </div>
+
+            <div class="daylight-chip sunset">
+                <img src="/static/icons/sunset.svg" alt="">
+                <span>Закат {{ .Sunset }}</span>
+            </div>
         </div>
     </header>
-    
 
     {{template "hourlybase.html" .}}
 </body>

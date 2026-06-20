@@ -4,6 +4,7 @@ go 1.25.6
 
 require (
 	github.com/go-chi/chi/v5 v5.2.5
+	github.com/joho/godotenv v1.5.1
 	github.com/redis/go-redis/v9 v9.19.0
 	modernc.org/sqlite v1.50.1
 )

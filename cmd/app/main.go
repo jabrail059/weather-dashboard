@@ -1,43 +1,71 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/jabrail059/weather-dashboard/internal/app"
-	"github.com/jabrail059/weather-dashboard/internal/handlers"
-	"github.com/jabrail059/weather-dashboard/storage/redis"
-	"github.com/jabrail059/weather-dashboard/storage/sqlite"
+	"github.com/jabrail059/weather-dashboard/internal/config"
+	"github.com/jabrail059/weather-dashboard/internal/server"
+	"github.com/jabrail059/weather-dashboard/internal/storage/redis"
+	"github.com/joho/godotenv"
 )
 
+func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Print("no .env file found")
+	}
+}
+
 func main() {
-	if err := redis.Connection(); err != nil {
+	cfg := config.New()
+
+	if err := app.Connect(cfg); err != nil {
 		log.Fatal(err.Error())
 	}
 
-	dbPath := os.Getenv("SQLITE_PATH")
-	if dbPath == "" {
-		dbPath = "./data/weather.db"
+	r := server.NewRouter()
+
+	srv := http.Server{
+		Addr:    cfg.AppAddr,
+		Handler: r,
 	}
-	cityStorage, err := sqlite.New(dbPath)
-	if err != nil {
-		log.Fatal("Не удалось подключиться к sqlite")
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatal(err)
+		}
+	}()
+
+	slog.Info("Sever started on " + srv.Addr)
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+	<-quit
+
+	slog.Info("Server shutting down")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Printf("server shutdown error: %v", err)
 	}
-	app.SetStorage(cityStorage)
 
-	r := chi.NewRouter()
-	r.Get("/", handlers.MainPage)
-	r.Get("/weather", handlers.Weather)
-	r.Post("/favorites/add", handlers.AddInFavorites)
-	r.Get("/favorites", handlers.GetFavorites)
-	r.Delete("/favorites/delete", handlers.DeleteFromFavorites)
-	r.Get("/searchhistory", handlers.SearchHistory)
-	r.Get("/weather/hourly", handlers.GetHourlyForecast)
+	if storage := app.Storage(); storage != nil {
+		if err := app.Storage().Close(); err != nil {
+			log.Printf("sqlite close error: %v", err)
+		}
+	}
 
-	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
-
-	log.Println("Server is listening...")
-	log.Fatal(http.ListenAndServe(":8081", r))
+	if err := redis.Close(); err != nil {
+		log.Printf("redis close error: %v", err)
+	}
 }

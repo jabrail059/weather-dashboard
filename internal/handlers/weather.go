@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"math"
 	"net/http"
 	"time"
 
@@ -11,7 +10,6 @@ import (
 	"github.com/jabrail059/weather-dashboard/internal/service"
 	"github.com/jabrail059/weather-dashboard/internal/session"
 	"github.com/jabrail059/weather-dashboard/internal/view"
-	"github.com/jabrail059/weather-dashboard/internal/weather"
 )
 
 func Weather(w http.ResponseWriter, r *http.Request) {
@@ -44,23 +42,11 @@ func Weather(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := struct {
-		City           string
-		Latitude       float64
-		Longitude      float64
-		CurrentWeather models.CurrentWeather
-		Days           []models.DayWeather
-	}{
-		City:      city,
-		Latitude:  geocode.Results[0].Latitude,
-		Longitude: geocode.Results[0].Longitude,
-	}
-
-	data.CurrentWeather = models.CurrentWeather{
-		Temperature:  math.Round(currentForecast.Temperature),
-		ApparentTemp: math.Round(currentForecast.ApparentTemp),
-		WindSpeed:    currentForecast.WindSpeed,
-		ImageSource:  weather.ImageSources[currentForecast.WeatherCode],
+	data := models.DailyData{
+		City:           geocode.Results[0].Name,
+		Latitude:       geocode.Results[0].Latitude,
+		Longitude:      geocode.Results[0].Longitude,
+		CurrentWeather: service.BuildCurrentWeather(currentForecast),
 	}
 
 	data.Days, err = service.BuildDayWeather(forecast)
@@ -69,7 +55,7 @@ func Weather(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := service.AddSearchHistory(r.Context(), city, cookie.Value); err != nil {
+	if err := service.AddSearchHistory(r.Context(), data.City, cookie.Value); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
