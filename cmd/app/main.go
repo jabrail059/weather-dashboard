@@ -44,7 +44,7 @@ func main() {
 		}
 	}()
 
-	slog.Info("Sever started on " + srv.Addr)
+	slog.Info("Sever started, addr " + srv.Addr)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
@@ -60,7 +60,7 @@ func main() {
 	}
 
 	if storage := app.Storage(); storage != nil {
-		if err := app.Storage().Close(); err != nil {
+		if err := storage.Close(); err != nil {
 			log.Printf("sqlite close error: %v", err)
 		}
 	}
