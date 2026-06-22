@@ -34,7 +34,7 @@ func main() {
 	r := server.NewRouter()
 
 	srv := http.Server{
-		Addr:    cfg.AppAddr,
+		Addr:    ":" + cfg.AppAddr,
 		Handler: r,
 	}
 
@@ -44,7 +44,7 @@ func main() {
 		}
 	}()
 
-	slog.Info("Sever started, addr " + srv.Addr)
+	slog.Info("Server started, addr " + srv.Addr)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)

@@ -2,7 +2,7 @@
 
 A server-rendered Go web application for checking weather forecasts by city.
 
-The project combines Go HTML templates with HTMX for partial page updates, stores user-related data in SQLite, and uses Redis to cache external weather API responses.
+The project uses Go HTML templates with HTMX for partial page updates, stores user-related data in SQLite, and uses Redis to cache external weather API responses.
 
 ## Screenshots
 
@@ -34,6 +34,7 @@ The project combines Go HTML templates with HTMX for partial page updates, store
 - CSS
 - SQLite
 - Redis
+- Docker
 - Open-Meteo API
 
 ## Technical Overview
@@ -46,68 +47,57 @@ The application is built as a server-rendered Go web app.
 - Weather data is requested from the Open-Meteo API.
 - Redis is used to cache external API responses.
 - SQLite stores favorite cities and search history.
+- Database migrations are stored in the `migrations/` directory.
 - Configuration is provided through environment variables.
 - The HTTP server supports graceful shutdown.
+- Docker Compose starts the application and Redis together.
 
 ## Configuration
 
-Create a local `.env` file from the example file:
+Before running the application, create a `.env` file from the example file:
 
 ```bash
 cp .env.example .env
 ```
 
-Example configuration:
+Example configuration for Docker:
 
 ```env
 APP_ADDR=:8081
-SQLITE_PATH=./data/weather.db
-REDIS_ADDR=localhost:6379
+SQLITE_PATH=/data/weather.db
+REDIS_ADDR=redis:6379
 REDIS_PASSWORD=
 REDIS_DB=0
 ```
 
 | Variable | Description |
 | --- | --- |
-| `APP_ADDR` | HTTP server address |
-| `SQLITE_PATH` | Path to the SQLite database file |
-| `REDIS_ADDR` | Redis server address |
+| `APP_ADDR` | HTTP server address inside the container |
+| `SQLITE_PATH` | Path to the SQLite database file inside the container |
+| `REDIS_ADDR` | Redis address inside the Docker Compose network |
 | `REDIS_PASSWORD` | Redis password, if required |
 | `REDIS_DB` | Redis database index |
 
-## Running Locally
+## Running with Docker
 
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/jabrail059/weather-dashboard.git
-cd weather-dashboard
-```
-
-### 2. Start Redis
-
-Redis is required for caching weather API responses.
+Docker Compose starts the Go application and Redis.
 
 ```bash
-redis-server
-```
-
-### 3. Create the environment file
-
-```bash
-cp .env.example .env
-```
-
-### 4. Run the application
-
-```bash
-go run ./cmd/app
+docker compose up --build
 ```
 
 The application will be available at:
 
 ```text
 http://localhost:8081
+```
+
+SQLite data is stored in the local `data/` directory, which is mounted into the application container.
+
+To stop the containers:
+
+```bash
+docker compose down
 ```
 
 ## Main Routes

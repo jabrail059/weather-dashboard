@@ -1,0 +1,9 @@
+.env
+.gocache/
+
+.git
+.gitignore
+
+data/*
+*.db
+!data/.gitkeep
