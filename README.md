@@ -63,7 +63,7 @@ cp .env.example .env
 Example configuration for Docker:
 
 ```env
-APP_ADDR=:8081
+APP_PORT=8081
 SQLITE_PATH=/data/weather.db
 REDIS_ADDR=redis:6379
 REDIS_PASSWORD=
@@ -72,7 +72,7 @@ REDIS_DB=0
 
 | Variable | Description |
 | --- | --- |
-| `APP_ADDR` | HTTP server address inside the container |
+| `APP_PORT` | HTTP server address inside the container |
 | `SQLITE_PATH` | Path to the SQLite database file inside the container |
 | `REDIS_ADDR` | Redis address inside the Docker Compose network |
 | `REDIS_PASSWORD` | Redis password, if required |

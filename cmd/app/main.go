@@ -34,7 +34,7 @@ func main() {
 	r := server.NewRouter()
 
 	srv := http.Server{
-		Addr:    ":" + cfg.AppAddr,
+		Addr:    ":" + cfg.AppPort,
 		Handler: r,
 	}
 

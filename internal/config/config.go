@@ -6,7 +6,7 @@ import (
 )
 
 type Config struct {
-	AppAddr       string
+	AppPort       string
 	SqlitePath    string
 	RedisAddr     string
 	RedisPassword string
@@ -16,7 +16,7 @@ type Config struct {
 func New() *Config {
 
 	return &Config{
-		AppAddr:       getEnv("APP_ADDR", ":8081"),
+		AppPort:       getEnv("APP_PORT", "8081"),
 		SqlitePath:    getEnv("SQLITE_PATH", ""),
 		RedisAddr:     getEnv("REDIS_ADDR", ""),
 		RedisPassword: getEnv("REDIS_PASSWORD", ""),
