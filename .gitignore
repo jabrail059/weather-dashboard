@@ -2,3 +2,4 @@ data/*
 !data/.gitkeep
 .gocache/
 .env
+.vscode/

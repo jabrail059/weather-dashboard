@@ -1,4 +1,4 @@
-.PHONY: build up down run
+.PHONY: build up down logs restart run fmt vet test
 
 build:
 	docker compose build app

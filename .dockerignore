@@ -1,5 +1,6 @@
 .env
 .gocache/
+.vscode/
 
 .git
 .gitignore
