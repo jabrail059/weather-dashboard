@@ -28,6 +28,10 @@ func New(connStr string) (*Storage, error) {
 		return nil, fmt.Errorf("Не удалось подключиться к базе данных: %w", err)
 	}
 
+	if err := initSchema(ctx, db); err != nil {
+		return nil, fmt.Errorf("Не удалось создать таблицу для базы данных: %v", err)
+	}
+
 	slog.Info("SQLite успешно подключен")
 	return &Storage{db: db}, nil
 }
@@ -56,4 +60,16 @@ func (s *Storage) Select(ctx context.Context, name string) (*models.Result, erro
 
 func (s *Storage) Close() error {
 	return s.db.Close()
+}
+
+func initSchema(ctx context.Context, db *sql.DB) error {
+	q := `CREATE TABLE IF NOT EXISTS cities (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL UNIQUE,
+			latitude REAL NOT NULL,
+			longitude REAL NOT NULL
+		);
+	`
+	_, err := db.ExecContext(ctx, q)
+	return err
 }
