@@ -22,7 +22,7 @@ func Connection(Config *config.Config) error {
 	defer cancel()
 
 	if _, err := client.Ping(ctx).Result(); err != nil {
-		return fmt.Errorf("Не удалось подключиться к Redis: %w", err)
+		return fmt.Errorf("не удалось подключиться к Redis: %w", err)
 	}
 
 	slog.Info("Redis успешно подключен")

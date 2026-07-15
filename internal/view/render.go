@@ -11,14 +11,14 @@ func RenderTemplate(w http.ResponseWriter, fileName string, data interface{}) er
 	path := fmt.Sprintf("templates/%s", fileName)
 	tmpl, err := template.ParseFiles(path)
 	if err != nil {
-		slog.Warn("Ошибка парсинга страницы: " + err.Error())
-		return fmt.Errorf("Возникла ошибка парсинга во время шаболнизации страницы")
+		slog.Warn("ошибка парсинга страницы: " + err.Error())
+		return fmt.Errorf("возникла ошибка парсинга во время шаблонизации страницы")
 	}
 
 	err = tmpl.Execute(w, data)
 	if err != nil {
-		slog.Warn(fmt.Sprintf("Ошибка шаблонизации страницы %v", err.Error()))
-		return fmt.Errorf("Возникла ошибка шаблонизации страницы")
+		slog.Warn(fmt.Sprintf("ошибка шаблонизации страницы %v", err.Error()))
+		return fmt.Errorf("возникла ошибка шаблонизации страницы")
 	}
 	return nil
 }
@@ -28,14 +28,14 @@ func RenderPartOfTemplate(w http.ResponseWriter, fileName string, data interface
 
 	tmpl, err := template.ParseFiles(path)
 	if err != nil {
-		slog.Warn("Ошибка парсинга страницы: " + err.Error())
-		return fmt.Errorf("Возникла ошибка парсинга во время шаболнизации страницы")
+		slog.Warn("ошибка парсинга страницы: " + err.Error())
+		return fmt.Errorf("возникла ошибка парсинга во время шаблонизации страницы")
 	}
 
 	err = tmpl.ExecuteTemplate(w, fileName, data)
 	if err != nil {
-		slog.Warn(fmt.Sprintf("Ошибка шаблонизации страницы %v", err.Error()))
-		return fmt.Errorf("Возникла ошибка шаблонизации страницы")
+		slog.Warn(fmt.Sprintf("ошибка шаблонизации страницы %v", err.Error()))
+		return fmt.Errorf("возникла ошибка шаблонизации страницы")
 	}
 	return nil
 }
@@ -45,14 +45,14 @@ func RenderSeveralTemplates(w http.ResponseWriter, firstFileName string, secondF
 	secondPath := fmt.Sprintf("templates/%s", secondFileName)
 	tmpl, err := template.ParseFiles(firstPath, secondPath)
 	if err != nil {
-		slog.Warn("Ошибка парсинга страницы: " + err.Error())
-		return fmt.Errorf("Возникла ошибка парсинга во время шаболнизации страницы")
+		slog.Warn("ошибка парсинга страницы: " + err.Error())
+		return fmt.Errorf("возникла ошибка парсинга во время шаблонизации страницы")
 	}
 
 	err = tmpl.Execute(w, data)
 	if err != nil {
-		slog.Warn(fmt.Sprintf("Ошибка шаблонизации страницы %v", err.Error()))
-		return fmt.Errorf("Возникла ошибка шаблонизации страницы")
+		slog.Warn(fmt.Sprintf("ошибка шаблонизации страницы %v", err.Error()))
+		return fmt.Errorf("возникла ошибка шаблонизации страницы")
 	}
 	return nil
 }

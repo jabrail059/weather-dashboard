@@ -19,18 +19,18 @@ func AddSearchHistory(ctx context.Context, city string, cookieValue string) erro
 	for _, c := range cities.Cities {
 		if c == city {
 			if err := redis.Client().LRem(ctx, key, 0, c).Err(); err != nil {
-				return fmt.Errorf("Не удалось изменить историю поиска")
+				return fmt.Errorf("не удалось изменить историю поиска")
 			}
 			break
 		}
 	}
 
 	if err := redis.Client().LPush(ctx, key, city).Err(); err != nil {
-		return fmt.Errorf("Не удалось сохранить город в истории поиска")
+		return fmt.Errorf("не удалось сохранить город в истории поиска")
 	}
 
 	if err := redis.Client().LTrim(ctx, key, 0, 4).Err(); err != nil {
-		return fmt.Errorf("Ошибка лимита истории поиска")
+		return fmt.Errorf("ошибка лимита истории поиска")
 	}
 
 	return nil
@@ -41,7 +41,7 @@ func GetSearchHistory(ctx context.Context, cookieValue string) (*models.CitiesDa
 
 	cities, err := redis.Client().LRange(ctx, key, 0, -1).Result()
 	if err != nil {
-		return nil, fmt.Errorf("Не удалось получить список городов")
+		return nil, fmt.Errorf("не удалось получить список городов")
 	}
 
 	return &models.CitiesData{

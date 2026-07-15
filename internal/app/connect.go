@@ -11,7 +11,7 @@ import (
 func Connect(cfg *config.Config) error {
 	cityStorage, err := sqlite.New(cfg.SqlitePath)
 	if err != nil {
-		return fmt.Errorf("Не удалось подключиться к sqlite: %w", err)
+		return fmt.Errorf("не удалось подключиться к sqlite: %w", err)
 	}
 	SetStorage(cityStorage)
 

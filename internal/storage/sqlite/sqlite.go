@@ -19,17 +19,17 @@ type Storage struct {
 func New(connStr string) (*Storage, error) {
 	db, err := sql.Open("sqlite", connStr)
 	if err != nil {
-		return nil, fmt.Errorf("Не удалось открыть базу данных: %w", err)
+		return nil, fmt.Errorf("не удалось открыть базу данных: %w", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 	if err := db.PingContext(ctx); err != nil {
-		return nil, fmt.Errorf("Не удалось подключиться к базе данных: %w", err)
+		return nil, fmt.Errorf("не удалось подключиться к базе данных: %w", err)
 	}
 
 	if err := initSchema(ctx, db); err != nil {
-		return nil, fmt.Errorf("Не удалось создать таблицу для базы данных: %v", err)
+		return nil, fmt.Errorf("не удалось создать таблицу для базы данных: %v", err)
 	}
 
 	slog.Info("SQLite успешно подключен")
@@ -39,7 +39,7 @@ func New(connStr string) (*Storage, error) {
 func (s *Storage) Save(ctx context.Context, geoResult *models.Result) error {
 	q := `INSERT INTO cities (name, latitude, longitude) VALUES (?, ?, ?)`
 	if _, err := s.db.ExecContext(ctx, q, geoResult.Name, geoResult.Latitude, geoResult.Longitude); err != nil {
-		return fmt.Errorf("Не удалось сохранить данные: %w", err)
+		return fmt.Errorf("не удалось сохранить данные: %w", err)
 	}
 	return nil
 }
@@ -52,7 +52,7 @@ func (s *Storage) Select(ctx context.Context, name string) (*models.Result, erro
 		return nil, storage.ErrCityNotSaved
 	}
 	if err != nil {
-		return nil, fmt.Errorf("Не удалось получить данные из базы данных: %w", err)
+		return nil, fmt.Errorf("не удалось получить данные из базы данных: %w", err)
 	}
 
 	return result, nil

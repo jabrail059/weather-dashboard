@@ -1,0 +1,14 @@
+name: Check
+on: push
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v7
+            - name: Install deps
+              run: go mod tidy
+            - name: golangci-lint
+              uses: golangci/golangci-lint-action@v9
+              with:
+                version: v2.12

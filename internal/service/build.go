@@ -15,15 +15,15 @@ func BuildDayWeather(forecast *models.Daily) ([]models.DayWeather, error) {
 	for i := 0; i < len(forecast.Time); i++ {
 		parsedTime, err := time.Parse("2006-01-02", forecast.Time[i])
 		if err != nil {
-			return nil, fmt.Errorf("Возникла ошибка при преобразовании даты: %v", err)
+			return nil, fmt.Errorf("возникла ошибка при преобразовании даты: %v", err)
 		}
 		sunrise, err := time.Parse("2006-01-02T15:04", forecast.Sunrise[i])
 		if err != nil {
-			return nil, fmt.Errorf("Возникла ошибка при преобразовании даты: %v", err)
+			return nil, fmt.Errorf("возникла ошибка при преобразовании даты: %v", err)
 		}
 		sunset, err := time.Parse("2006-01-02T15:04", forecast.Sunset[i])
 		if err != nil {
-			return nil, fmt.Errorf("Возникла ошибка при преобразовании даты: %v", err)
+			return nil, fmt.Errorf("возникла ошибка при преобразовании даты: %v", err)
 		}
 		dailyTemp := models.DayWeather{
 			Date:               parsedTime.Format("2006-01-02"),
@@ -45,7 +45,7 @@ func BuildHourlyWeather(forecast *models.Hourly, sunrise string, sunset string) 
 	for i := 0; i < len(forecast.Time); i++ {
 		parsedTime, err := time.Parse("2006-01-02T15:04", forecast.Time[i])
 		if err != nil {
-			return nil, fmt.Errorf("Возникла ошибка при преобразовании даты: %v", err)
+			return nil, fmt.Errorf("возникла ошибка при преобразовании даты: %v", err)
 		}
 		formattedTime := parsedTime.Format("15:04")
 		hourlyTemp := models.HourlyWeather{
@@ -83,7 +83,7 @@ func BuildOneDayForecast(forecast *models.Hourly, date string) (*models.Hourly, 
 	}
 
 	if len(newForecast.Time) == 0 {
-		return nil, fmt.Errorf("Прогноз на %s не найден", date)
+		return nil, fmt.Errorf("прогноз на %s не найден", date)
 	}
 
 	return newForecast, nil

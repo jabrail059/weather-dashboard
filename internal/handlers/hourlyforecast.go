@@ -16,7 +16,7 @@ func GetHourlyForecast(w http.ResponseWriter, r *http.Request) {
 	sunrise := r.URL.Query().Get("sunrise")
 	sunset := r.URL.Query().Get("sunset")
 
-	forecast, err, statusCode := service.GetHourlyForecast(r.Context(), lat, lon, date)
+	forecast, statusCode, err := service.GetHourlyForecast(r.Context(), lat, lon, date)
 	if err != nil {
 		http.Error(w, err.Error(), statusCode)
 		return

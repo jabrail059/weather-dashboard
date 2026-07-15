@@ -26,17 +26,17 @@ func Weather(w http.ResponseWriter, r *http.Request) {
 	cookie := session.GetOrCreate(r)
 	http.SetCookie(w, cookie)
 
-	geocode, err, statusCode := service.GeocodeCity(ctx, app.Storage(), city)
+	geocode, statusCode, err := service.GeocodeCity(ctx, app.Storage(), city)
 	if err != nil {
 		http.Error(w, err.Error(), statusCode)
 		return
 	}
-	forecast, err, statusCode := service.GetDailyForecast(ctx, geocode.Results[0].Latitude, geocode.Results[0].Longitude)
+	forecast, statusCode, err := service.GetDailyForecast(ctx, geocode.Results[0].Latitude, geocode.Results[0].Longitude)
 	if err != nil {
 		http.Error(w, err.Error(), statusCode)
 		return
 	}
-	currentForecast, err, statusCode := service.GetCurrentForecast(ctx, geocode.Results[0].Latitude, geocode.Results[0].Longitude)
+	currentForecast, statusCode, err := service.GetCurrentForecast(ctx, geocode.Results[0].Latitude, geocode.Results[0].Longitude)
 	if err != nil {
 		http.Error(w, err.Error(), statusCode)
 		return

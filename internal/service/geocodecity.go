@@ -13,7 +13,7 @@ import (
 	"github.com/jabrail059/weather-dashboard/internal/storage"
 )
 
-func GeocodeCity(ctx context.Context, cityStorage storage.Storage, city string) (*models.GeoRequest, error, int) {
+func GeocodeCity(ctx context.Context, cityStorage storage.Storage, city string) (*models.GeoRequest, int, error) {
 	var geo models.GeoRequest
 	cityName := normalizeCityName(city)
 
@@ -22,42 +22,42 @@ func GeocodeCity(ctx context.Context, cityStorage storage.Storage, city string) 
 		geo = models.GeoRequest{
 			Results: []models.Result{*result},
 		}
-		return &geo, nil, http.StatusOK
+		return &geo, http.StatusOK, nil
 	}
 	if err != storage.ErrCityNotSaved {
-		return nil, fmt.Errorf("Не удалось получить данные"), http.StatusInternalServerError
+		return nil, http.StatusInternalServerError, fmt.Errorf("не удалось получить данные")
 	}
 
 	apiURL := fmt.Sprintf("https://geocoding-api.open-meteo.com/v1/search?name=%s&count=1&language=ru&format=json", url.QueryEscape(cityName))
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("Не удалось создать запрос"), http.StatusInternalServerError
+		return nil, http.StatusInternalServerError, fmt.Errorf("не удалось создать запрос")
 	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("Не удалось получить о погоде"), http.StatusBadRequest
+		return nil, http.StatusBadRequest, fmt.Errorf("не удалось получить о погоде")
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Возникла ошибка при получении данных"), resp.StatusCode
+		return nil, resp.StatusCode, fmt.Errorf("возникла ошибка при получении данных")
 	}
 
 	if err = json.NewDecoder(resp.Body).Decode(&geo); err != nil {
-		return nil, fmt.Errorf("Не удалось получить данные"), http.StatusBadRequest
+		return nil, http.StatusBadRequest, fmt.Errorf("не удалось получить данные")
 	}
 	if len(geo.Results) == 0 {
-		return nil, fmt.Errorf("Город не найден"), http.StatusNotFound
+		return nil, http.StatusNotFound, fmt.Errorf("город не найден")
 	}
 	geo.Results[0].Name = cityName
 	err = cityStorage.Save(ctx, &geo.Results[0])
 	if err != nil {
-		return nil, fmt.Errorf("Не удалось сохранить данные"), http.StatusInternalServerError
+		return nil, http.StatusInternalServerError, fmt.Errorf("не удалось сохранить данные")
 	}
 
-	return &geo, nil, http.StatusOK
+	return &geo, http.StatusOK, nil
 }
 
 func normalizeCityName(city string) string {

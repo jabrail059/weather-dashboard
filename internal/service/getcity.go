@@ -14,27 +14,27 @@ func GetCityByIP(ctx context.Context, ip string) (*models.CityReport, error) {
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("Не удалось создать запрос")
+		return nil, fmt.Errorf("не удалось создать запрос")
 	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("Не удалось получить данные")
+		return nil, fmt.Errorf("не удалось получить данные")
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Возникла ошибка при получении данных")
+		return nil, fmt.Errorf("возникла ошибка при получении данных")
 	}
 
 	var report models.CityReport
 	err = json.NewDecoder(resp.Body).Decode(&report)
 	if err != nil {
-		return nil, fmt.Errorf("Не удалось получить данные")
+		return nil, fmt.Errorf("не удалось получить данные")
 	}
 
 	if report.Status != "success" {
-		return nil, fmt.Errorf("Не удалось определить город")
+		return nil, fmt.Errorf("не удалось определить город")
 	}
 
 	return &report, nil
