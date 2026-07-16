@@ -1,4 +1,4 @@
-.PHONY: build up down logs restart run fmt vet test
+.PHONY: build up down logs restart run fmt vet test lint
 
 build:
 	docker compose build app
@@ -26,3 +26,7 @@ vet:
 
 test:
 	go test ./...
+
+lint:
+	golangci-lint run
+
