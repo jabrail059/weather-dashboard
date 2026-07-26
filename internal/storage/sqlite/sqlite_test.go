@@ -12,7 +12,10 @@ import (
 func TestSqlite(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "test.db")
 
-	storage, err := New(path)
+	storage, err := New(
+		path,
+		"file://../../../migrations",
+	)
 	require.NoError(t, err)
 
 	t.Cleanup(func() {

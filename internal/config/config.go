@@ -8,6 +8,7 @@ import (
 type Config struct {
 	AppPort       string
 	SqlitePath    string
+	MigrationsURL string
 	RedisAddr     string
 	RedisPassword string
 	RedisDB       int
@@ -18,6 +19,7 @@ func New() *Config {
 	return &Config{
 		AppPort:       getEnv("APP_PORT", "8081"),
 		SqlitePath:    getEnv("SQLITE_PATH", ""),
+		MigrationsURL: getEnv("MIGRATIONS_URL", "file://migrations"),
 		RedisAddr:     getEnv("REDIS_ADDR", ""),
 		RedisPassword: getEnv("REDIS_PASSWORD", ""),
 		RedisDB:       getEnvAsInt("REDIS_DB", 0),

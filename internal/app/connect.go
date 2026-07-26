@@ -9,7 +9,7 @@ import (
 )
 
 func Connect(cfg *config.Config) error {
-	cityStorage, err := sqlite.New(cfg.SqlitePath)
+	cityStorage, err := sqlite.New(cfg.SqlitePath, cfg.MigrationsURL)
 	if err != nil {
 		return fmt.Errorf("не удалось подключиться к sqlite: %w", err)
 	}

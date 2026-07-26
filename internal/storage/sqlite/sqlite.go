@@ -7,6 +7,9 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/sqlite"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jabrail059/weather-dashboard/internal/models"
 	"github.com/jabrail059/weather-dashboard/internal/storage"
 	_ "modernc.org/sqlite"
@@ -16,8 +19,8 @@ type Storage struct {
 	db *sql.DB
 }
 
-func New(connStr string) (*Storage, error) {
-	db, err := sql.Open("sqlite", connStr)
+func New(dbPath string, migrationsURL string) (*Storage, error) {
+	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		return nil, fmt.Errorf("не удалось открыть базу данных: %w", err)
 	}
@@ -28,8 +31,8 @@ func New(connStr string) (*Storage, error) {
 		return nil, fmt.Errorf("не удалось подключиться к базе данных: %w", err)
 	}
 
-	if err := initSchema(ctx, db); err != nil {
-		return nil, fmt.Errorf("не удалось создать таблицу для базы данных: %v", err)
+	if err := applyMigrations(db, migrationsURL); err != nil {
+		return nil, fmt.Errorf("не удалось применить миграции: %w", err)
 	}
 
 	slog.Info("SQLite успешно подключен")
@@ -62,14 +65,25 @@ func (s *Storage) Close() error {
 	return s.db.Close()
 }
 
-func initSchema(ctx context.Context, db *sql.DB) error {
-	q := `CREATE TABLE IF NOT EXISTS cities (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL UNIQUE,
-			latitude REAL NOT NULL,
-			longitude REAL NOT NULL
-		);
-	`
-	_, err := db.ExecContext(ctx, q)
-	return err
+func applyMigrations(db *sql.DB, migrationsURL string) error {
+	driver, err := sqlite.WithInstance(db, &sqlite.Config{})
+	if err != nil {
+		return err
+	}
+
+	migrator, err := migrate.NewWithDatabaseInstance(
+		migrationsURL,
+		"sqlite",
+		driver,
+	)
+	if err != nil {
+		return err
+	}
+
+	if err := migrator.Up(); err != nil && err != migrate.ErrNoChange {
+		return err
+	}
+	slog.Info("Миграции успешно применены.")
+
+	return nil
 }
