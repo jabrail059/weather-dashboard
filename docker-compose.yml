@@ -2,7 +2,7 @@ services:
   app:
     env_file:
       - .env
-    build: .
+    image: jabrail059/weather-dashboard:latest
     ports:
       - "${APP_PORT}:8081"
     depends_on:
