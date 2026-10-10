@@ -3,3 +3,5 @@ data/*
 .gocache/
 .env
 .vscode/
+
+out

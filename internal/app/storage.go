@@ -1,13 +1,13 @@
 package app
 
-import "github.com/jabrail059/weather-dashboard/internal/storage"
+// import "github.com/jabrail059/weather-dashboard/internal/storage"
 
-var db storage.Storage
+// var db storage.Storage
 
-func SetStorage(database storage.Storage) {
-	db = database
-}
+// func SetStorage(database storage.Storage) {
+// 	db = database
+// }
 
-func Storage() storage.Storage {
-	return db
-}
+// func Storage() storage.Storage {
+// 	return db
+// }

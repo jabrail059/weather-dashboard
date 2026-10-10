@@ -4,15 +4,15 @@
 
 <div id="current" class="current-grid" hx-swap-oob="true">
     <h4>Погода сейчас</h4>
-    <p class="current-temp">На улице: {{ .CurrentWeather.Temperature}}℃</p>
-    <p class="feels-like">Ощущается как: {{ .CurrentWeather.ApparentTemp}}℃</p>
-    <h4>Скорость ветра: {{ .CurrentWeather.WindSpeed}} м/с</h4>
+    <p class="current-temp">На улице: {{ .CurrentForecast.Temperature}}℃</p>
+    <p class="feels-like">Ощущается как: {{ .CurrentForecast.ApparentTemp}}℃</p>
+    <h4>Скорость ветра: {{ .CurrentForecast.WindSpeed}} м/с</h4>
     <img src="{{ .CurrentWeather.ImageSource}}" alt="">
 </div>
 
 <div class="weather-grid">
     {{range .Days}}
-        <button class="weather-card" type="button" onclick="window.location.href='/weather/hourly?lat={{ $.Latitude }}&lon={{ $.Longitude}}&date={{ .Date }}&city={{ $.City }}&sunrise={{ .Sunrise }}&sunset={{ .Sunset }}'">
+        <button class="weather-card" type="button" onclick="window.location.href='/api/v1/weather/hourly?&date={{ .Date }}&city={{ $.City }}&sunrise={{ .Sunrise }}&sunset={{ .Sunset }}'">
             <ol>
                 <h4>{{ .Time}}</h4>
                 <h4 style="text-align: center;">{{ .TemperatureMax}}℃</h4>
