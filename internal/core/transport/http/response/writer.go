@@ -20,7 +20,7 @@ func NewResponseWriter(w http.ResponseWriter) *ResponseWriter {
 }
 
 func (w *ResponseWriter) WriteHeader(statusCode int) {
-	w.WriteHeader(statusCode)
+	w.ResponseWriter.WriteHeader(statusCode)
 	w.statusCode = statusCode
 }
 
