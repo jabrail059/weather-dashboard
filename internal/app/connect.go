@@ -1,23 +1,23 @@
 package app
 
-import (
-	"fmt"
+// import (
+// 	"fmt"
 
-	"github.com/jabrail059/weather-dashboard/internal/config"
-	"github.com/jabrail059/weather-dashboard/internal/storage/redis"
-	"github.com/jabrail059/weather-dashboard/internal/storage/sqlite"
-)
+// 	"github.com/jabrail059/weather-dashboard/internal/config"
+// 	"github.com/jabrail059/weather-dashboard/internal/storage/redis"
+// 	"github.com/jabrail059/weather-dashboard/internal/storage/sqlite"
+// )
 
-func Connect(cfg *config.Config) error {
-	cityStorage, err := sqlite.New(cfg.SqlitePath, cfg.MigrationsURL)
-	if err != nil {
-		return fmt.Errorf("не удалось подключиться к sqlite: %w", err)
-	}
-	SetStorage(cityStorage)
+// func Connect(cfg *config.Config) error {
+// 	cityStorage, err := sqlite.New(cfg.SqlitePath, cfg.MigrationsURL)
+// 	if err != nil {
+// 		return fmt.Errorf("не удалось подключиться к sqlite: %w", err)
+// 	}
+// 	SetStorage(cityStorage)
 
-	if err := redis.Connection(cfg); err != nil {
-		return err
-	}
+// 	if err := redis.Connection(cfg); err != nil {
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }

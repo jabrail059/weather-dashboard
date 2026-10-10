@@ -1,4 +1,7 @@
-.PHONY: build up down logs restart run fmt vet test lint
+include .env
+export 
+
+export PROJECT_ROOT=$(shell pwd)
 
 build:
 	docker compose build app
@@ -15,8 +18,10 @@ logs:
 restart:
 	docker compose restart app
 
-run:
-	go run ./cmd/app/
+dashboard-run:
+	@export LOGGER_FOLDER=${PROJECT_ROOT}/out/logs && \
+	go mod tidy && \
+	go run ${PROJECT_ROOT}/cmd/dashboard/main.go
 
 fmt:
 	go fmt ./...
