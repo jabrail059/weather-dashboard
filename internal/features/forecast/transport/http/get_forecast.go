@@ -37,7 +37,7 @@ func (h *ForecastHTTPHandler) GetForecast(w http.ResponseWriter, r *http.Request
 	if err := responseHandler.RenderPartHTML(forecast, "base.html"); err != nil {
 		responseHandler.ErrorResponse(
 			err,
-			"render part of HTML template",
+			"render forecast HTML template",
 		)
 
 		return

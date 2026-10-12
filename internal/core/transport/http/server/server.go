@@ -37,7 +37,7 @@ func (s *HTTPServer) RegisterApiRouters(routers ...*ApiVersionRouter) {
 		prefix := "/api/" + string(router.apiVersion)
 
 		s.mux.Handle(
-			prefix,
+			prefix+"/",
 			http.StripPrefix(prefix, router.WithMiddleware()),
 		)
 	}
@@ -57,7 +57,7 @@ func (s *HTTPServer) RegisterStaticFiles(prefix string, dir string) {
 	s.mux.Handle(
 		prefix,
 		http.StripPrefix(
-			prefix+"/",
+			prefix,
 			http.FileServer(http.Dir(dir)),
 		),
 	)

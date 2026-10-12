@@ -16,6 +16,10 @@ import (
 	forecast_openmeteo_repository "github.com/jabrail059/weather-dashboard/internal/features/forecast/repository/openmeteo"
 	forecast_service "github.com/jabrail059/weather-dashboard/internal/features/forecast/service"
 	forecast_transport_http "github.com/jabrail059/weather-dashboard/internal/features/forecast/transport/http"
+	web_api_repository "github.com/jabrail059/weather-dashboard/internal/features/web/repository/api"
+	web_redis_repository "github.com/jabrail059/weather-dashboard/internal/features/web/repository/redis"
+	web_service "github.com/jabrail059/weather-dashboard/internal/features/web/service"
+	web_transport_http "github.com/jabrail059/weather-dashboard/internal/features/web/transport/http"
 	"go.uber.org/zap"
 )
 
@@ -58,12 +62,22 @@ func main() {
 	forecastService := forecast_service.NewForecastService(forecastRepository)
 	forecastHTTPHandler := forecast_transport_http.NewForecastHTTPHandler(forecastService)
 
+	logger.Debug("Initializing feature", zap.String("feature", "web"))
+	redisClient := web_redis_repository.NewRedisClient(
+		web_redis_repository.NewConfigMust(),
+	)
+	redisRepository := web_redis_repository.NewWebRedisRepository(redisClient)
+	apiRepository := web_api_repository.NewWebApiRepository(client, cfg.IpApiBaseURL)
+	webService := web_service.NewWebService(redisRepository, apiRepository)
+	webHTTPHandler := web_transport_http.NewWebHTTPHadnler(webService)
+
 	logger.Debug("Initializing HTTP server")
 
 	httpConfig := core_http_server.NewConfigMust()
 	httpServer := core_http_server.NewHTTPServer(
 		httpConfig,
 		logger,
+		core_http_middleware.CORS(httpConfig.AllowedOrigins),
 		core_http_middleware.RequestID(),
 		core_http_middleware.Logger(logger),
 		core_http_middleware.Trace(),
@@ -76,7 +90,8 @@ func main() {
 	httpServer.RegisterApiRouters(
 		apiVersionRouterV1,
 	)
-	//httpServer.RegisterRoutes()
+
+	httpServer.RegisterRoutes(webHTTPHandler.Routes()...)
 
 	httpServer.RegisterStaticFiles("/static/", "./static")
 
@@ -84,6 +99,9 @@ func main() {
 		logger.Error("HTTP server run error", zap.Error(err))
 	}
 
+	if err := redisClient.Close(); err != nil {
+		logger.Error("Close Redis client", zap.Error(err))
+	}
 	// cfg := config.New()
 
 	// if err := app.Connect(cfg); err != nil {

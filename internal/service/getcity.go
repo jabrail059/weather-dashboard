@@ -1,41 +1,41 @@
 package service
 
-import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"net/http"
+// import (
+// 	"context"
+// 	"encoding/json"
+// 	"fmt"
+// 	"net/http"
 
-	"github.com/jabrail059/weather-dashboard/internal/models"
-)
+// 	"github.com/jabrail059/weather-dashboard/internal/models"
+// )
 
-func GetCityByIP(ctx context.Context, ip string) (*models.CityReport, error) {
-	apiURL := fmt.Sprintf("http://ip-api.com/json/%s?lang=ru&fields=status,city,lat,lon", ip)
+// func GetCityByIP(ctx context.Context, ip string) (*models.CityReport, error) {
+// 	apiURL := fmt.Sprintf("http://ip-api.com/json/%s?lang=ru&fields=status,city,lat,lon", ip)
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
-	if err != nil {
-		return nil, fmt.Errorf("не удалось создать запрос")
-	}
+// 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("не удалось создать запрос")
+// 	}
 
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("не удалось получить данные")
-	}
-	defer resp.Body.Close() //nolint:errcheck
+// 	resp, err := http.DefaultClient.Do(req)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("не удалось получить данные")
+// 	}
+// 	defer resp.Body.Close() //nolint:errcheck
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("возникла ошибка при получении данных")
-	}
+// 	if resp.StatusCode != http.StatusOK {
+// 		return nil, fmt.Errorf("возникла ошибка при получении данных")
+// 	}
 
-	var report models.CityReport
-	err = json.NewDecoder(resp.Body).Decode(&report)
-	if err != nil {
-		return nil, fmt.Errorf("не удалось получить данные")
-	}
+// 	var report models.CityReport
+// 	err = json.NewDecoder(resp.Body).Decode(&report)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("не удалось получить данные")
+// 	}
 
-	if report.Status != "success" {
-		return nil, fmt.Errorf("не удалось определить город")
-	}
+// 	if report.Status != "success" {
+// 		return nil, fmt.Errorf("не удалось определить город")
+// 	}
 
-	return &report, nil
-}
+// 	return &report, nil
+// }
