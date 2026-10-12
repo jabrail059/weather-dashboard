@@ -46,7 +46,7 @@ func (h *ForecastHTTPHandler) GetHourlyForecast(w http.ResponseWriter, r *http.R
 	if err := responseHandler.RenderHTML(forecast, files); err != nil {
 		responseHandler.ErrorResponse(
 			err,
-			"render HTML template",
+			"render hourly forecast HTML template",
 		)
 
 		return

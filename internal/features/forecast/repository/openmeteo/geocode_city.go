@@ -8,6 +8,13 @@ import (
 
 	"github.com/jabrail059/weather-dashboard/internal/core/domain"
 	core_errors "github.com/jabrail059/weather-dashboard/internal/core/transport/http/errors"
+	core_http_url "github.com/jabrail059/weather-dashboard/internal/core/transport/url"
+)
+
+const (
+	defaultCount    = "1"
+	defaultLanguage = "ru"
+	defaultFormat   = "json"
 )
 
 func (r *ForecastRepository) GeocodeCity(
@@ -27,8 +34,17 @@ func (r *ForecastRepository) GeocodeCity(
 	// if err != storage.ErrCityNotSaved {
 	// 	return nil, http.StatusInternalServerError, fmt.Errorf("не удалось получить данные")
 	// }
+	params := map[string]string{
+		"name":     normalizedCityName,
+		"count":    defaultCount,
+		"language": defaultLanguage,
+		"format":   defaultFormat,
+	}
 
-	apiURL, err := r.buildGeocodingURL(normalizedCityName)
+	apiURL, err := core_http_url.BuildURL(
+		r.geocodingBaseURL,
+		params,
+	)
 	if err != nil {
 		return domain.GeocodeResult{}, fmt.Errorf("build geocoding url: %w", err)
 	}

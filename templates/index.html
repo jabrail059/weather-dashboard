@@ -10,12 +10,12 @@
     <link rel="stylesheet" href="/static/styles/style.css?v=6">
 </head>
     <body>
-        <div hx-get="/searchhistory" id="history" hx-trigger="load, searchHistoryChanged from:body" ></div>
+        <div hx-get="/history" id="history" hx-trigger="load, searchHistoryChanged from:body" ></div>
 
         <div class="search-row">
             <div id="current"></div>
 
-            <form hx-get="/weather" hx-target="#result" class="search-form">
+            <form hx-get="/api/v1/weather" hx-target="#result" class="search-form">
                 <input 
                     type="text"
                     placeholder="Введите название города..."
@@ -25,10 +25,10 @@
                     Узнать погоду
                 </button>
             </form>
-            {{if .AutoDetected}}
+            {{if .Detected}}
             <form class="geo-form">
-                    <p>Возможно, вы в городе {{ .AutoCity}}</p>
-                    <button type="button" hx-get="/weather" hx-target="#result" hx-vals='{"city": "{{ .AutoCity}}"}'>Показать погоду</button>
+                    <p>Возможно, вы в городе {{ .City}}</p>
+                    <button type="button" hx-get="/api/v1/weather" hx-target="#result" hx-vals='{"city": "{{ .City}}"}'>Показать погоду</button>
             </form>
             {{end}}
         </div>

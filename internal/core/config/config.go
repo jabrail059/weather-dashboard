@@ -12,6 +12,7 @@ type Config struct {
 	TimeZone         *time.Location
 	GeocodingBaseURL string `envconfig:"GEOCODING_BASE_URL" required:"true"`
 	ForecastBaseURL  string `envconfig:"FORECAST_BASE_URL" required:"true"`
+	IpApiBaseURL     string `envconfig:"IP_API_BASE_URL" required:"true"`
 }
 
 func NewConfig() (*Config, error) {

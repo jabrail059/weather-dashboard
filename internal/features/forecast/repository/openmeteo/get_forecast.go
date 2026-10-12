@@ -3,8 +3,10 @@ package forecast_openmeteo_repository
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/jabrail059/weather-dashboard/internal/core/domain"
+	core_http_url "github.com/jabrail059/weather-dashboard/internal/core/transport/url"
 )
 
 const (
@@ -30,15 +32,17 @@ func (r *ForecastRepository) GetForecast(
 	// 	return &res.Daily, http.StatusOK, nil
 	// }
 
-	forecastParams := map[string]string{
+	params := map[string]string{
+		"latitude":    strconv.FormatFloat(latitude, 'f', -1, 64),
+		"longitude":   strconv.FormatFloat(longitude, 'f', -1, 64),
+		"timezone":    defaultTimezone,
 		dailyURLKey:   dailyForecastQueryParams,
 		currentURLKey: currentURLQueryParams,
 	}
 
-	apiURL, err := r.buildForecastURL(
-		latitude,
-		longitude,
-		forecastParams,
+	apiURL, err := core_http_url.BuildURL(
+		r.forecastBaseURL,
+		params,
 	)
 	if err != nil {
 		return domain.Forecast{}, fmt.Errorf("build forecast url: %w", err)
