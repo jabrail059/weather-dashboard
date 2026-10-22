@@ -1,1 +1,3 @@
-DROP TABLE IF NOT EXISTS cities;
+DROP TABLE dashboard.favorites;
+DROP TABLE dashboard.cities;
+DROP SCHEMA dashboard;

@@ -11,7 +11,7 @@ const (
 	defaultTimezone = "auto"
 )
 
-func (r *ForecastRepository) getResponseFromOpenMeteo(
+func (r *ForecastOpenmeteoRepository) getResponseFromOpenMeteo(
 	ctx context.Context,
 	apiURL string,
 	response any,

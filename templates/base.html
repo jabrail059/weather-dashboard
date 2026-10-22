@@ -1,25 +1,30 @@
-<button class="add-favorite" type="button" hx-post="/favorites/add?city={{ .City }}" hx-target="#favs">
-    Добавить в избранные
-</button>
+<div class="forecast-heading">
+    <div>
+        <span class="section-kicker">БЛИЖАЙШИЕ ДНИ</span>
+        <h2>Прогноз для {{ .City }}</h2>
+    </div>
+    <button class="add-favorite" type="button" hx-post="/api/v1/favorites?city={{ .City }}" hx-target="#favs">
+        <span aria-hidden="true">♡</span> В избранное
+    </button>
+</div>
 
-<div id="current" class="current-grid" hx-swap-oob="true">
-    <h4>Погода сейчас</h4>
-    <p class="current-temp">На улице: {{ .CurrentForecast.Temperature}}℃</p>
-    <p class="feels-like">Ощущается как: {{ .CurrentForecast.ApparentTemp}}℃</p>
-    <h4>Скорость ветра: {{ .CurrentForecast.WindSpeed}} м/с</h4>
-    <img src="{{ .CurrentForecast.ImageSource}}" alt="">
+<div id="current" class="current-card" hx-swap-oob="true">
+    <span class="current-kicker">ПОГОДА СЕЙЧАС</span>
+    <h2>{{ .City }}</h2>
+    <img src="{{ .CurrentForecast.ImageSource }}" alt="" aria-hidden="true">
+    <div class="current-temp">{{ .CurrentForecast.Temperature }}<span>℃</span></div>
+    <p class="current-feels">Ощущается как {{ .CurrentForecast.ApparentTemp }}℃</p>
+    <div class="current-wind"><span aria-hidden="true">↗</span> Ветер {{ .CurrentForecast.WindSpeed }} м/с</div>
 </div>
 
 <div class="weather-grid">
     {{range .Days}}
-        <button class="weather-card" type="button" onclick="window.location.href='/api/v1/weather/hourly?date={{ .Date }}&city={{ $.City }}&sunrise={{ .Sunrise }}&sunset={{ .Sunset }}'">
-            <ol>
-                <h4>{{ .Time}}</h4>
-                <h4 style="text-align: center;">{{ .TemperatureMax}}℃</h4>
-                <h4 style="text-align: center;">{{ .TemperatureMin}}℃</h4>
-                <h5>{{ .WeatherDescription}}</h5>
-                <img src="{{ .ImageSource }}" alt="">
-            </ol>
-        </button>
+    <a class="weather-card" href="/api/v1/weather/hourly?date={{ .Date }}&amp;city={{ $.City }}&amp;sunrise={{ .Sunrise }}&amp;sunset={{ .Sunset }}" hx-boost="true" hx-indicator="#weather-loading">
+        <span class="weather-day">{{ .Time }}</span>
+        <img src="{{ .ImageSource }}" alt="" aria-hidden="true">
+        <span class="weather-temps"><strong>{{ .TemperatureMax }}°</strong><span>{{ .TemperatureMin }}°</span></span>
+        <span class="weather-description">{{ .WeatherDescription }}</span>
+        <span class="weather-details">По часам <span aria-hidden="true">↗</span></span>
+    </a>
     {{end}}
 </div>

@@ -1,11 +1,9 @@
 <div class="hourly-grid">
     {{range .Hours}}
-        <div class="hourly-card">
-            <ol>
-                <h4>{{ .Time}}</h4>
-                <strong class="hourly-temp" style="text-align: center;">{{ .Temperature }}℃</strong>
-                <img src="{{ .ImageSource }}" alt="">
-            </ol>
-        </div>
+    <div class="hourly-card">
+        <time>{{ .Time }}</time>
+        <img src="{{ .ImageSource }}" alt="" aria-hidden="true">
+        <strong class="hourly-temp">{{ .Temperature }}°</strong>
+    </div>
     {{end}}
 </div>

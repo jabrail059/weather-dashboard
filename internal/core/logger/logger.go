@@ -91,3 +91,7 @@ func (l *Logger) Close() {
 		fmt.Println("failed to close application logger:", err)
 	}
 }
+
+func (l *Logger) WarnError(msg string, err error) {
+	l.Logger.Warn(msg, zap.Error(err))
+}

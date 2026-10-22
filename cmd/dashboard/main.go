@@ -11,9 +11,17 @@ import (
 
 	core_config "github.com/jabrail059/weather-dashboard/internal/core/config"
 	core_logger "github.com/jabrail059/weather-dashboard/internal/core/logger"
+	core_pgx_pool "github.com/jabrail059/weather-dashboard/internal/core/repository/postgres/pool/pgx"
+	core_goredis_client "github.com/jabrail059/weather-dashboard/internal/core/repository/redis/client/go-redis"
 	core_http_middleware "github.com/jabrail059/weather-dashboard/internal/core/transport/http/middleware"
 	core_http_server "github.com/jabrail059/weather-dashboard/internal/core/transport/http/server"
+	favorites_postgres_repository "github.com/jabrail059/weather-dashboard/internal/features/favorites/repository/postgres"
+	favorites_redis_repository "github.com/jabrail059/weather-dashboard/internal/features/favorites/repository/redis"
+	favorites_service "github.com/jabrail059/weather-dashboard/internal/features/favorites/service"
+	favorites_transport_http "github.com/jabrail059/weather-dashboard/internal/features/favorites/transport/http"
 	forecast_openmeteo_repository "github.com/jabrail059/weather-dashboard/internal/features/forecast/repository/openmeteo"
+	forecast_postgres_repository "github.com/jabrail059/weather-dashboard/internal/features/forecast/repository/postgres"
+	forecast_redis_repository "github.com/jabrail059/weather-dashboard/internal/features/forecast/repository/redis"
 	forecast_service "github.com/jabrail059/weather-dashboard/internal/features/forecast/service"
 	forecast_transport_http "github.com/jabrail059/weather-dashboard/internal/features/forecast/transport/http"
 	web_api_repository "github.com/jabrail059/weather-dashboard/internal/features/web/repository/api"
@@ -51,25 +59,55 @@ func main() {
 		Timeout: 15 * time.Second,
 	}
 
+	redisClient, err := core_goredis_client.NewClient(
+		ctx,
+		core_goredis_client.NewConfigMust(),
+	)
+	if err != nil {
+		logger.Fatal("failed to init redis client", zap.Error(err))
+	}
+
+	pool, err := core_pgx_pool.NewPool(
+		ctx,
+		core_pgx_pool.NewConfigMust(),
+	)
+	if err != nil {
+		logger.Fatal("failed to init postgres connection pool", zap.Error(err))
+	}
+
 	logger.Debug("application time zone", zap.Any("zone", time.Local))
 
 	logger.Debug("Initializing feature", zap.String("feature", "forecast"))
-	forecastRepository := forecast_openmeteo_repository.NewForecastRepository(
+	forecastOpenmeteoRepository := forecast_openmeteo_repository.NewForecastOpenmeteoRepository(
 		client,
 		cfg.GeocodingBaseURL,
 		cfg.ForecastBaseURL,
 	)
-	forecastService := forecast_service.NewForecastService(forecastRepository)
+	forecastPostgresRepository := forecast_postgres_repository.NewForecastPostgresRepository(
+		pool,
+	)
+	forecastRedisRepository := forecast_redis_repository.NewForecastRedisRepository(redisClient)
+	forecastService := forecast_service.NewForecastService(
+		forecastOpenmeteoRepository,
+		forecastPostgresRepository,
+		forecastRedisRepository,
+	)
 	forecastHTTPHandler := forecast_transport_http.NewForecastHTTPHandler(forecastService)
 
 	logger.Debug("Initializing feature", zap.String("feature", "web"))
-	redisClient := web_redis_repository.NewRedisClient(
-		web_redis_repository.NewConfigMust(),
-	)
-	redisRepository := web_redis_repository.NewWebRedisRepository(redisClient)
-	apiRepository := web_api_repository.NewWebApiRepository(client, cfg.IpApiBaseURL)
-	webService := web_service.NewWebService(redisRepository, apiRepository)
+	webRedisRepository := web_redis_repository.NewWebRedisRepository(redisClient)
+	webApiRepository := web_api_repository.NewWebApiRepository(client, cfg.IpApiBaseURL)
+	webService := web_service.NewWebService(webRedisRepository, webApiRepository)
 	webHTTPHandler := web_transport_http.NewWebHTTPHadnler(webService)
+
+	logger.Debug("Initializing feature", zap.String("feature", "favorites"))
+	favoritesPostgresRepository := favorites_postgres_repository.NewFavoritesRepository(pool)
+	favoritesRedisRepository := favorites_redis_repository.NewFavoritesRedisRepository(redisClient)
+	favoritesService := favorites_service.NewFavoritesService(
+		favoritesPostgresRepository,
+		favoritesRedisRepository,
+	)
+	favoritesHTTPHandler := favorites_transport_http.NewFavoritesHTTPHander(favoritesService)
 
 	logger.Debug("Initializing HTTP server")
 
@@ -86,6 +124,7 @@ func main() {
 
 	apiVersionRouterV1 := core_http_server.NewApiVersionRouter(core_http_server.ApiVersion1)
 	apiVersionRouterV1.RegisterRoutes(forecastHTTPHandler.Routes()...)
+	apiVersionRouterV1.RegisterRoutes(favoritesHTTPHandler.Routes()...)
 
 	httpServer.RegisterApiRouters(
 		apiVersionRouterV1,
@@ -102,47 +141,4 @@ func main() {
 	if err := redisClient.Close(); err != nil {
 		logger.Error("Close Redis client", zap.Error(err))
 	}
-	// cfg := config.New()
-
-	// if err := app.Connect(cfg); err != nil {
-	// 	log.Fatal(err.Error())
-	// }
-
-	// r := server.NewRouter()
-
-	// srv := http.Server{
-	// 	Addr:    ":" + cfg.AppPort,
-	// 	Handler: r,
-	// }
-
-	// go func() {
-	// 	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-	// 		log.Fatal(err)
-	// 	}
-	// }()
-
-	// slog.Info("Server started, addr " + srv.Addr)
-
-	// quit := make(chan os.Signal, 1)
-	// signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
-	// <-quit
-
-	// slog.Info("Server shutting down")
-
-	// ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	// defer cancel()
-
-	// if err := srv.Shutdown(ctx); err != nil {
-	// 	log.Printf("server shutdown error: %v", err)
-	// }
-
-	// if storage := app.Storage(); storage != nil {
-	// 	if err := storage.Close(); err != nil {
-	// 		log.Printf("sqlite close error: %v", err)
-	// 	}
-	// }
-
-	// if err := redis.Close(); err != nil {
-	// 	log.Printf("redis close error: %v", err)
-	// }
 }

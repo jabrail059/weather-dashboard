@@ -17,6 +17,7 @@ type ForecastService interface {
 	GetForecast(
 		ctx context.Context,
 		city *string,
+		value string,
 	) (domain.Forecast, error)
 
 	GetHourlyForecast(

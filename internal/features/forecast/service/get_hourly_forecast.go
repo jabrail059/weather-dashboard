@@ -2,6 +2,7 @@ package forecast_service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -33,21 +34,27 @@ func (s *ForecastService) GetHourlyForecast(
 	strSunrise := sunrise.Format("15:04")
 	strSunset := sunset.Format("15:04")
 
-	geocodeCity, err := s.forecastRepository.GeocodeCity(
-		ctx,
-		*city,
-	)
+	geocodeCity, err := s.forecastPostgresRepository.GetCity(ctx, *city)
 	if err != nil {
-		return domain.HourlyRender{}, fmt.Errorf(
-			"get city geocode from repository: %w",
-			err,
+		if !errors.Is(err, core_errors.ErrNotFound) {
+			return domain.HourlyRender{}, fmt.Errorf("get city from postgres: %w", err)
+		}
+		geocodeCity, err = s.forecastOpenmeteoRepository.GeocodeCity(
+			ctx,
+			*city,
 		)
+		if err != nil {
+			return domain.HourlyRender{}, fmt.Errorf(
+				"get city geocode from repository: %w",
+				err,
+			)
+		}
 	}
 
 	latitude := geocodeCity.Latitude
 	longitude := geocodeCity.Longitude
 
-	forecast, err := s.forecastRepository.GetHourlyForecast(
+	forecast, err := s.forecastOpenmeteoRepository.GetHourlyForecast(
 		ctx,
 		latitude,
 		longitude,

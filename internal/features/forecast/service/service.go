@@ -7,10 +7,12 @@ import (
 )
 
 type ForecastService struct {
-	forecastRepository ForecastRepository
+	forecastOpenmeteoRepository ForecastOpenmeteoRepository
+	forecastPostgresRepository  ForecastPostgresRepository
+	forecastRedisRepository     ForecastRedisRepository
 }
 
-type ForecastRepository interface {
+type ForecastOpenmeteoRepository interface {
 	GeocodeCity(
 		ctx context.Context,
 		city string,
@@ -27,18 +29,49 @@ type ForecastRepository interface {
 		latitude float64,
 		longitude float64,
 	) (domain.OneDayForecast, error)
+}
 
-	// GetCurrentForecast(
-	// 	ctx context.Context,
-	// 	latitude float64,
-	// 	longitude float64,
-	// ) (*domain.CurrentForecast, error)
+type ForecastPostgresRepository interface {
+	GetCity(
+		ctx context.Context,
+		city string,
+	) (domain.GeocodeResult, error)
+
+	SaveCity(
+		ctx context.Context,
+		city string,
+		latitude float64,
+		longitude float64,
+	) error
+}
+
+type ForecastRedisRepository interface {
+	AddForecast(
+		ctx context.Context,
+		forecast domain.Forecast,
+	) error
+
+	GetForecast(
+		ctx context.Context,
+		latitude float64,
+		longitude float64,
+	) (domain.Forecast, error)
+
+	AddSearchHistory(
+		ctx context.Context,
+		city string,
+		value string,
+	) error
 }
 
 func NewForecastService(
-	forecastRepository ForecastRepository,
+	forecastOpenmeteoRepository ForecastOpenmeteoRepository,
+	forecastPostgresRepository ForecastPostgresRepository,
+	forecastRedisRepository ForecastRedisRepository,
 ) *ForecastService {
 	return &ForecastService{
-		forecastRepository: forecastRepository,
+		forecastOpenmeteoRepository: forecastOpenmeteoRepository,
+		forecastPostgresRepository:  forecastPostgresRepository,
+		forecastRedisRepository:     forecastRedisRepository,
 	}
 }

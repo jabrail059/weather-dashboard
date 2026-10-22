@@ -1,12 +1,10 @@
 {{if .Presence}}
-<div class="searchhistory">
-        <h4 class="history-title">Недавно искали:</h4>
-        <div class="history-chips">
-            {{range .Cities}}
-                <div class="history-chip">
-                    <h5>{{ . }}</h5>
-                </div>
-            {{end}}
-        </div>
-</div>
+<section class="searchhistory">
+    <div class="list-heading"><span class="list-heading-icon" aria-hidden="true">↺</span><h3>Недавно искали</h3></div>
+    <div class="history-chips">
+        {{range .Cities}}
+        <span class="history-chip">{{ . }}</span>
+        {{end}}
+    </div>
+</section>
 {{end}}
