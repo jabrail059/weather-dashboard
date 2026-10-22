@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/jabrail059/weather-dashboard/internal/core/domain"
-	core_http_url "github.com/jabrail059/weather-dashboard/internal/core/transport/url"
+	core_http_utils "github.com/jabrail059/weather-dashboard/internal/core/transport/utils"
 )
 
 const (
@@ -14,7 +14,7 @@ const (
 	hourlyForecastQueryParams = "weather_code,temperature_2m"
 )
 
-func (r *ForecastRepository) GetHourlyForecast(
+func (r *ForecastOpenmeteoRepository) GetHourlyForecast(
 	ctx context.Context,
 	latitude float64,
 	longitude float64,
@@ -28,7 +28,7 @@ func (r *ForecastRepository) GetHourlyForecast(
 		hourlURLKey: hourlyForecastQueryParams,
 	}
 
-	apiURL, err := core_http_url.BuildURL(
+	apiURL, err := core_http_utils.BuildURL(
 		r.forecastBaseURL,
 		params,
 	)
@@ -46,14 +46,5 @@ func (r *ForecastRepository) GetHourlyForecast(
 	}
 
 	oneDayForecast := hourlyForecastFromResponse(hourlyResponse)
-	// key := fmt.Sprintf("forecast:%s:%s", latitude, longitude)
-
-	// value, err := redis.Client().Get(ctx, key).Result()
-	// if err != nil {
-	// 	return nil, http.StatusNotFound, fmt.Errorf("отсутствуют данные о почасовой погоде")
-	// }
-	// if err := json.Unmarshal([]byte(value), &openMeteoResponse); err != nil {
-	// 	return nil, http.StatusInternalServerError, fmt.Errorf("не удалось получить данные")
-	// }
 	return oneDayForecast, nil
 }

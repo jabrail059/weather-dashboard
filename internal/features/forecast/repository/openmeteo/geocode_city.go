@@ -8,7 +8,7 @@ import (
 
 	"github.com/jabrail059/weather-dashboard/internal/core/domain"
 	core_errors "github.com/jabrail059/weather-dashboard/internal/core/transport/http/errors"
-	core_http_url "github.com/jabrail059/weather-dashboard/internal/core/transport/url"
+	core_http_utils "github.com/jabrail059/weather-dashboard/internal/core/transport/utils"
 )
 
 const (
@@ -17,23 +17,13 @@ const (
 	defaultFormat   = "json"
 )
 
-func (r *ForecastRepository) GeocodeCity(
+func (r *ForecastOpenmeteoRepository) GeocodeCity(
 	ctx context.Context,
 	city string,
 ) (domain.GeocodeResult, error) {
 	var geocodeCity GeocodeCityResponse
 	normalizedCityName := normalizeCityName(city)
 
-	// result, err := cityStorage.Select(ctx, cityName)
-	// if err == nil {
-	// 	geo = models.GeoRequest{
-	// 		Results: []models.Result{*result},
-	// 	}
-	// 	return &geo, http.StatusOK, nil
-	// }
-	// if err != storage.ErrCityNotSaved {
-	// 	return nil, http.StatusInternalServerError, fmt.Errorf("не удалось получить данные")
-	// }
 	params := map[string]string{
 		"name":     normalizedCityName,
 		"count":    defaultCount,
@@ -41,7 +31,7 @@ func (r *ForecastRepository) GeocodeCity(
 		"format":   defaultFormat,
 	}
 
-	apiURL, err := core_http_url.BuildURL(
+	apiURL, err := core_http_utils.BuildURL(
 		r.geocodingBaseURL,
 		params,
 	)
@@ -69,10 +59,6 @@ func (r *ForecastRepository) GeocodeCity(
 	geocodeCity.Results[0].Name = normalizedCityName
 
 	geocodeResult := geocodeResultsFromResponse(geocodeCity)
-	// err = cityStorage.Save(ctx, &geo.Results[0])
-	// if err != nil {
-	// 	return nil, http.StatusInternalServerError, fmt.Errorf("не удалось сохранить данные")
-	// }
 
 	return geocodeResult, nil
 }

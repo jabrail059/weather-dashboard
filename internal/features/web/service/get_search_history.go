@@ -9,10 +9,13 @@ import (
 func (s *WebService) GetSearchHistory(
 	ctx context.Context,
 	value string,
-) (domain.History, error) {
+) (domain.HistoryList, error) {
 	history, err := s.webRedisRepository.GetSearchHistory(ctx, value)
 	if err != nil {
-		return domain.History{Presence: false}, nil
+		return domain.HistoryList{
+			Presence: false,
+			CacheErr: err,
+		}, nil
 	}
 
 	return history, nil

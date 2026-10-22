@@ -18,10 +18,10 @@ func Cookie() *http.Cookie {
 	}
 }
 
-func GetOrCreate(r *http.Request) *http.Cookie {
+func GetOrCreate(r *http.Request) (*http.Cookie, bool) {
 	cookie, err := r.Cookie("session_id")
-	if err != nil {
-		cookie = Cookie()
+	if err == nil {
+		return cookie, false
 	}
-	return cookie
+	return Cookie(), true
 }

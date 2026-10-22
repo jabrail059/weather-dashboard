@@ -14,6 +14,7 @@ type Forecast struct {
 	Longitude       float64
 	CurrentForecast CurrentForecast
 	Days            []DayForecast
+	CacheErr        error `json:"-"`
 }
 
 func NewForecast(

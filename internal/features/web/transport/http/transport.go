@@ -21,7 +21,7 @@ type WebService interface {
 	GetSearchHistory(
 		ctx context.Context,
 		value string,
-	) (domain.History, error)
+	) (domain.HistoryList, error)
 }
 
 func NewWebHTTPHadnler(

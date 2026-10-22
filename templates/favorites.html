@@ -1,13 +1,13 @@
 {{if .Presence}}
-<div class="favorites">
-        <h4 class="favorites-title">Избранные:</h4>
-        <div class="favorite-chips">
-            {{range .Cities}}
-                <div class="favorite-chip">
-                    <button class="favorite-city" type="button" hx-get="/weather?city={{ . }}" hx-target="#result">{{ . }}</button>
-                    <button class="favorite-remove" type="button" hx-delete="/favorites/delete?city={{ . }}" hx-target="#favs" aria-label="Remove {{ . }}">x</button>
-                </div>
-            {{end}}
+<section class="favorites">
+    <div class="list-heading"><span class="list-heading-icon" aria-hidden="true">♡</span><h3>Избранные города</h3></div>
+    <div class="favorite-chips">
+        {{range .Cities}}
+        <div class="favorite-chip">
+            <button class="favorite-city" type="button" hx-get="/api/v1/weather?city={{ . }}" hx-target="#result" hx-indicator="#weather-loading">{{ . }}</button>
+            <button class="favorite-remove" type="button" hx-delete="/api/v1/favorites?city={{ . }}" hx-target="#favs" aria-label="Удалить {{ . }} из избранного">×</button>
         </div>
-</div>
+        {{end}}
+    </div>
+</section>
 {{end}}

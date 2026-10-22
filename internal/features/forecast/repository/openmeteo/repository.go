@@ -2,18 +2,18 @@ package forecast_openmeteo_repository
 
 import "net/http"
 
-type ForecastRepository struct {
+type ForecastOpenmeteoRepository struct {
 	client           *http.Client
 	geocodingBaseURL string
 	forecastBaseURL  string
 }
 
-func NewForecastRepository(
+func NewForecastOpenmeteoRepository(
 	client *http.Client,
 	geocodingBaseURL string,
 	forecastBaseURL string,
-) *ForecastRepository {
-	return &ForecastRepository{
+) *ForecastOpenmeteoRepository {
+	return &ForecastOpenmeteoRepository{
 		client:           client,
 		geocodingBaseURL: geocodingBaseURL,
 		forecastBaseURL:  forecastBaseURL,

@@ -15,7 +15,8 @@ func NewCityReport(
 	}
 }
 
-type History struct {
+type HistoryList struct {
 	Cities   []string
 	Presence bool
+	CacheErr error
 }

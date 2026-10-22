@@ -1,29 +1,15 @@
 package web_redis_repository
 
-import (
-	"github.com/redis/go-redis/v9"
-)
+import core_redis_client "github.com/jabrail059/weather-dashboard/internal/core/repository/redis/client"
 
 type WebRedisRepository struct {
-	client *redis.Client
+	client core_redis_client.Client
 }
 
 func NewWebRedisRepository(
-	client *redis.Client,
+	client core_redis_client.Client,
 ) *WebRedisRepository {
 	return &WebRedisRepository{
 		client: client,
 	}
-}
-
-func NewRedisClient(
-	config Config,
-) *redis.Client {
-	client := redis.NewClient(&redis.Options{
-		Addr:     config.Addr,
-		Password: config.Password,
-		DB:       config.DB,
-	})
-
-	return client
 }

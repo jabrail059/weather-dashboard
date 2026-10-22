@@ -14,10 +14,13 @@ func (h *WebHTTPHandler) GetSearchHistory(w http.ResponseWriter, r *http.Request
 
 	responseHandler := core_http_response.NewHTTPResponseHandler(log, w)
 
-	cookie := core_http_session.GetOrCreate(r)
-	http.SetCookie(w, cookie)
+	cookie, isNew := core_http_session.GetOrCreate(r)
+	if isNew {
+		http.SetCookie(w, cookie)
+	}
+	value := cookie.Value
 
-	history, err := h.webService.GetSearchHistory(ctx, cookie.Value)
+	history, err := h.webService.GetSearchHistory(ctx, value)
 	if err != nil {
 		responseHandler.ErrorResponse(
 			err,
@@ -27,7 +30,11 @@ func (h *WebHTTPHandler) GetSearchHistory(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if err := responseHandler.RenderHTML(history, []string{"search_history.html"}); err != nil {
+	if history.CacheErr != nil {
+		log.WarnError("cache error", history.CacheErr)
+	}
+
+	if err := responseHandler.RenderPartHTML(history, "search_history.html"); err != nil {
 		responseHandler.ErrorResponse(
 			err,
 			"render history HTML template",

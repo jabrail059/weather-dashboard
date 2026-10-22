@@ -6,6 +6,7 @@ import (
 	core_logger "github.com/jabrail059/weather-dashboard/internal/core/logger"
 	core_http_request "github.com/jabrail059/weather-dashboard/internal/core/transport/http/request"
 	core_http_response "github.com/jabrail059/weather-dashboard/internal/core/transport/http/response"
+	core_http_session "github.com/jabrail059/weather-dashboard/internal/core/transport/http/session"
 )
 
 func (h *ForecastHTTPHandler) GetForecast(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +23,16 @@ func (h *ForecastHTTPHandler) GetForecast(w http.ResponseWriter, r *http.Request
 
 	city := GetCityQueryParam(r)
 
-	forecast, err := h.forecastService.GetForecast(ctx, city)
+	cookie, isNew := core_http_session.GetOrCreate(r)
+	if isNew {
+		http.SetCookie(w, cookie)
+	}
+	value := cookie.Value
+
+	forecast, err := h.forecastService.GetForecast(ctx, city, value)
+	if forecast.CacheErr != nil {
+		log.WarnError("cache error", forecast.CacheErr)
+	}
 
 	if err != nil {
 		responseHandler.ErrorResponse(

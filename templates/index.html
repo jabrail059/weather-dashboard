@@ -1,39 +1,162 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#101e38">
     <title>Прогноз погоды</title>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
-    <script> htmx.config.selfRequestsOnly = false </script>
     <link rel="icon" type="image/svg+xml" href="/static/icons/weather.svg">
-    <link rel="stylesheet" href="/static/styles/style.css?v=6">
+    <link rel="stylesheet" href="/static/styles/style.css?v=8">
 </head>
-    <body>
-        <div hx-get="/history" id="history" hx-trigger="load, searchHistoryChanged from:body" ></div>
+<body class="dashboard-page">
+    <main class="dashboard-shell">
+        <header class="site-header">
+            <a class="brand" href="/" aria-label="На главную">
+                <span class="brand-mark" aria-hidden="true">✳</span>
+                <span>Погода<span class="brand-accent">.</span></span>
+            </a>
+            <span class="header-note">Ваш прогноз на каждый день</span>
+        </header>
 
-        <div class="search-row">
-            <div id="current"></div>
+        <section class="dashboard-hero">
+            <div class="hero-copy">
+                <span class="eyebrow"><span class="eyebrow-dot"></span> ПРОГНОЗ РЯДОМ</span>
+                <h1>Погода, с которой<br><em>легко планировать.</em></h1>
+                <p>Найдите город и узнайте, что ждёт вас сегодня и в ближайшие дни.</p>
+            </div>
+            <div class="hero-art" aria-hidden="true">
+                <div class="hero-sun"></div>
+                <div class="hero-cloud hero-cloud-back"></div>
+                <div class="hero-cloud hero-cloud-front"></div>
+                <span class="hero-spark hero-spark-one">✦</span>
+                <span class="hero-spark hero-spark-two">✦</span>
+            </div>
+        </section>
 
-            <form hx-get="/api/v1/weather" hx-target="#result" class="search-form">
-                <input 
-                    type="text"
-                    placeholder="Введите название города..."
-                    name="city"
-                />
-                <button type="submit">
-                    Узнать погоду
-                </button>
-            </form>
-            {{if .Detected}}
-            <form class="geo-form">
-                    <p>Возможно, вы в городе {{ .City}}</p>
-                    <button type="button" hx-get="/api/v1/weather" hx-target="#result" hx-vals='{"city": "{{ .City}}"}'>Показать погоду</button>
-            </form>
-            {{end}}
+        <div class="dashboard-grid">
+            <aside class="dashboard-sidebar" aria-label="Текущая погода и история">
+                <div id="current"></div>
+                <div hx-get="/history" id="history" hx-trigger="load, searchHistoryChanged from:body"></div>
+            </aside>
+
+            <div class="dashboard-main">
+                <section class="search-panel" aria-label="Поиск города">
+                    <div class="panel-heading">
+                        <span class="section-kicker">ВАШ ГОРОД</span>
+                        <h2>Куда смотрим сегодня?</h2>
+                    </div>
+                    <form hx-get="/api/v1/weather" hx-target="#result" hx-indicator="#weather-loading" class="search-form">
+                        <label for="city-search">Название города</label>
+                        <div class="search-controls">
+                            <input id="city-search" type="text" name="city" placeholder="Например, Москва" autocomplete="off" required>
+                            <button type="submit">Показать погоду <span aria-hidden="true">→</span></button>
+                        </div>
+                    </form>
+                    {{if .Detected}}
+                    <div class="geo-suggestion">
+                        <span>Возможно, вы в городе <strong>{{ .City }}</strong></span>
+                        <button type="button" hx-get="/api/v1/weather" hx-target="#result" hx-indicator="#weather-loading" hx-vals='{"city": "{{ .City }}"}'>Показать</button>
+                    </div>
+                    {{end}}
+                </section>
+
+                <div id="request-feedback" class="request-feedback" role="alert" hidden>
+                    <span class="feedback-icon" aria-hidden="true">!</span>
+                    <span id="request-feedback-text"></span>
+                    <button id="request-feedback-close" type="button" aria-label="Закрыть сообщение">×</button>
+                </div>
+
+                <div id="favs" hx-get="/api/v1/favorites" hx-trigger="load, favoritesChanged from:body"></div>
+
+                <div id="weather-loading" class="weather-loading" role="status" aria-live="polite">
+                    <span class="weather-loading-spinner" aria-hidden="true"></span>
+                    Загружаем прогноз…
+                </div>
+                <div id="result"></div>
+            </div>
         </div>
+    </main>
 
-        <div id="favs" hx-get="/favorites" hx-trigger="load"></div>
-        <div id="result"></div>
-    </body> 
+    <script>
+    (() => {
+        if (window.weatherDashboardHandlersInstalled) return;
+        window.weatherDashboardHandlersInstalled = true;
+
+        function syncPageClass() {
+            const hourly = Boolean(document.querySelector(".hourly-page"));
+            document.body.classList.toggle("dashboard-page", !hourly);
+            document.body.classList.toggle("hourly-body", hourly);
+        }
+
+        function feedback() {
+            return document.getElementById("request-feedback");
+        }
+
+        function clearError() {
+            const box = feedback();
+            if (!box) return;
+            box.hidden = true;
+            box.querySelector("#request-feedback-text").textContent = "";
+        }
+
+        function showError(message) {
+            const box = feedback();
+            if (!box) return;
+            box.querySelector("#request-feedback-text").textContent = message;
+            box.hidden = false;
+            box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+
+        function requestPath(detail) {
+            const url = detail.xhr?.responseURL || detail.requestConfig?.path || "";
+            try {
+                return new URL(url, window.location.href).pathname;
+            } catch {
+                return "";
+            }
+        }
+
+        function errorMessage(detail) {
+            const status = detail.xhr.status;
+            const path = requestPath(detail);
+            let response;
+            try {
+                response = JSON.parse(detail.xhr.responseText);
+            } catch {
+                response = null;
+            }
+
+            if (status === 404) {
+                return path.startsWith("/api/v1/weather")
+                    ? "Город или прогноз не найден. Проверьте название города."
+                    : "Запись не найдена. Обновите страницу и попробуйте снова.";
+            }
+            if (status === 400) {
+                return response?.error?.includes("city must be not NULL")
+                    ? "Введите название города."
+                    : "Проверьте введённые данные и попробуйте снова.";
+            }
+            if (status === 409) return "Этот город уже есть в избранном.";
+            if (status === 429) return "Слишком много запросов. Попробуйте немного позже.";
+            return "Не удалось выполнить запрос. Попробуйте ещё раз позже.";
+        }
+
+        document.addEventListener("click", (event) => {
+            if (event.target.closest("#request-feedback-close")) clearError();
+        });
+        document.addEventListener("htmx:beforeRequest", clearError);
+        document.addEventListener("htmx:responseError", (event) => showError(errorMessage(event.detail)));
+        document.addEventListener("htmx:sendError", () => showError("Нет соединения с сервером. Проверьте сеть и попробуйте снова."));
+        document.addEventListener("htmx:timeout", () => showError("Сервер отвечает слишком долго. Попробуйте ещё раз."));
+        document.addEventListener("htmx:afterSwap", syncPageClass);
+        document.addEventListener("htmx:historyRestore", syncPageClass);
+        document.addEventListener("htmx:afterRequest", (event) => {
+            if (event.detail.successful && requestPath(event.detail) === "/api/v1/weather") {
+                htmx.trigger(document.body, "searchHistoryChanged");
+            }
+        });
+    })();
+    </script>
+</body>
 </html>

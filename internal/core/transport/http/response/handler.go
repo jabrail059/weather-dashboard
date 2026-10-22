@@ -39,6 +39,10 @@ func (h *HTTPResponseHandler) JSONResponse(
 	}
 }
 
+func (h *HTTPResponseHandler) NoContentResponse() {
+	h.w.WriteHeader(http.StatusNoContent)
+}
+
 func (h *HTTPResponseHandler) PanicResponse(p any, msg string) {
 	statusCode := http.StatusInternalServerError
 	err := fmt.Errorf("unexpected panic: %v", p)
@@ -120,7 +124,7 @@ func (h *HTTPResponseHandler) RenderHTML(data any, file []string) error {
 	}
 
 	paths := make([]string, len(file))
-	for i, path := range paths {
+	for i, path := range file {
 		path = fmt.Sprintf("templates/%s", path)
 		paths[i] = path
 	}

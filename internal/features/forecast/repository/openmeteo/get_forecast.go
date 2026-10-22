@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/jabrail059/weather-dashboard/internal/core/domain"
-	core_http_url "github.com/jabrail059/weather-dashboard/internal/core/transport/url"
+	core_http_utils "github.com/jabrail059/weather-dashboard/internal/core/transport/utils"
 )
 
 const (
@@ -16,21 +16,12 @@ const (
 	currentURLQueryParams    = "temperature_2m,apparent_temperature,wind_speed_10m,weather_code,is_day"
 )
 
-func (r *ForecastRepository) GetForecast(
+func (r *ForecastOpenmeteoRepository) GetForecast(
 	ctx context.Context,
 	latitude float64,
 	longitude float64,
 ) (domain.Forecast, error) {
 	var openMeteoResponse OpenMeteoResponse
-	//key := fmt.Sprintf("forecast:%v:%v", latitude, longitude)
-
-	// value, err := redis.Client().Get(ctx, key).Result()
-	// if err == nil {
-	// 	if err = json.Unmarshal([]byte(value), &res); err != nil {
-	// 		return nil, http.StatusInternalServerError, fmt.Errorf("не удалось получить данные")
-	// 	}
-	// 	return &res.Daily, http.StatusOK, nil
-	// }
 
 	params := map[string]string{
 		"latitude":    strconv.FormatFloat(latitude, 'f', -1, 64),
@@ -40,7 +31,7 @@ func (r *ForecastRepository) GetForecast(
 		currentURLKey: currentURLQueryParams,
 	}
 
-	apiURL, err := core_http_url.BuildURL(
+	apiURL, err := core_http_utils.BuildURL(
 		r.forecastBaseURL,
 		params,
 	)
@@ -63,13 +54,4 @@ func (r *ForecastRepository) GetForecast(
 	}
 
 	return forecast, nil
-
-	// jsonRes, err := json.Marshal(openMeteoResponse)
-	// if err != nil {
-	// 	return nil, http.StatusInternalServerError, fmt.Errorf("не удалось обработать данные")
-	// }
-
-	// if err = redis.Client().Set(ctx, key, jsonRes, time.Minute*45).Err(); err != nil {
-	// 	return nil, http.StatusInternalServerError, fmt.Errorf("не удалось кешировать данные")
-	// }
 }

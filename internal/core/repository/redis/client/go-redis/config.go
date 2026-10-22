@@ -1,4 +1,4 @@
-package web_redis_repository
+package core_goredis_client
 
 import (
 	"fmt"

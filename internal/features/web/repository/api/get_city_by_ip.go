@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jabrail059/weather-dashboard/internal/core/domain"
-	core_http_url "github.com/jabrail059/weather-dashboard/internal/core/transport/url"
+	core_http_utils "github.com/jabrail059/weather-dashboard/internal/core/transport/utils"
 )
 
 type CityReport struct {
@@ -23,7 +23,7 @@ func (r *WebApiRepository) GetCityByIP(
 	}
 	getIpURL := fmt.Sprintf("%s/%s", r.getIpURL, ip)
 
-	apiURL, err := core_http_url.BuildURL(getIpURL, params)
+	apiURL, err := core_http_utils.BuildURL(getIpURL, params)
 	if err != nil {
 		return domain.CityReport{}, fmt.Errorf(
 			"build ip-api url: %w",

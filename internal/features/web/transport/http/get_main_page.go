@@ -30,8 +30,10 @@ func (h *WebHTTPHandler) GetMainPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cookie := core_http_session.GetOrCreate(r)
-	http.SetCookie(w, cookie)
+	cookie, isNew := core_http_session.GetOrCreate(r)
+	if isNew {
+		http.SetCookie(w, cookie)
+	}
 
 	if err := responseHandler.RenderHTML(data, []string{"index.html"}); err != nil {
 		responseHandler.ErrorResponse(
