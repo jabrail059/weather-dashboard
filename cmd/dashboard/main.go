@@ -31,12 +31,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// func init() {
-// 	if err := godotenv.Load(); err != nil {
-// 		log.Print("no .env file found")
-// 	}
-// }
-
 func main() {
 	cfg := core_config.NewConfigMust()
 	time.Local = cfg.TimeZone

@@ -1,4 +1,4 @@
-package weather
+package domain
 
 var WeatherDescriptions = map[int]string{
 	0:  "Ясно",

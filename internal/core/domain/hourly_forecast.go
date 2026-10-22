@@ -7,7 +7,6 @@ import (
 	"time"
 
 	core_errors "github.com/jabrail059/weather-dashboard/internal/core/transport/http/errors"
-	"github.com/jabrail059/weather-dashboard/internal/weather"
 )
 
 type HourlyRender struct {
@@ -108,12 +107,12 @@ func validateHourlyForecast(
 
 	if weatherCode <= 2 {
 		if formattedTime <= sunrise || formattedTime >= sunset {
-			hour.ImageSource = weather.NightImageSources[weatherCode]
+			hour.ImageSource = NightImageSources[weatherCode]
 		} else {
-			hour.ImageSource = weather.ImageSources[weatherCode]
+			hour.ImageSource = ImageSources[weatherCode]
 		}
 	} else {
-		hour.ImageSource = weather.ImageSources[weatherCode]
+		hour.ImageSource = ImageSources[weatherCode]
 	}
 
 	return hour, nil

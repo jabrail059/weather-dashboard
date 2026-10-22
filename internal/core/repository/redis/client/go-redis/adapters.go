@@ -7,7 +7,6 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// тут опиши импементации интерфейсов возвращаемых типов если таковые будут
 type StringSliceCmd struct {
 	*redis.StringSliceCmd
 }

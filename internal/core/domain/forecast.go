@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"math"
 	"time"
-
-	"github.com/jabrail059/weather-dashboard/internal/weather"
 )
 
 type Forecast struct {
@@ -65,8 +63,8 @@ func NewDayForecast(
 	time = parsedTime.Format("January 2, 2006")
 	temperatureMax = math.Round(temperatureMax)
 	temperatureMin = math.Round(temperatureMin)
-	weatherDescription := weather.WeatherDescriptions[weatherCode]
-	imageSource := weather.ImageSources[weatherCode]
+	weatherDescription := WeatherDescriptions[weatherCode]
+	imageSource := ImageSources[weatherCode]
 	sunrise = parsedSunrise.Format("15:04")
 	sunset = parsedSunset.Format("15:04")
 
@@ -125,12 +123,12 @@ func NewCurrentForecast(
 	var imageSource string
 	if weatherCode <= 2 {
 		if isDay != 0 {
-			imageSource = weather.ImageSources[weatherCode]
+			imageSource = ImageSources[weatherCode]
 		} else {
-			imageSource = weather.NightImageSources[weatherCode]
+			imageSource = NightImageSources[weatherCode]
 		}
 	} else {
-		imageSource = weather.ImageSources[weatherCode]
+		imageSource = ImageSources[weatherCode]
 	}
 
 	return CurrentForecast{
