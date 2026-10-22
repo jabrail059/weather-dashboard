@@ -93,5 +93,5 @@ func (l *Logger) Close() {
 }
 
 func (l *Logger) WarnError(msg string, err error) {
-	l.Logger.Warn(msg, zap.Error(err))
+	l.Warn(msg, zap.Error(err))
 }
