@@ -1,0 +1,37 @@
+<div class="forecast-heading">
+    <div>
+        <span class="section-kicker" data-ru="ОБЗОР ПОГОДЫ" data-en="WEATHER OVERVIEW">ОБЗОР ПОГОДЫ</span>
+        <h2><span data-ru="Прогноз для" data-en="Forecast for">Прогноз для</span> {{ .City }}</h2>
+    </div>
+    <button class="add-favorite" type="button" hx-post="/api/v1/favorites?city={{ .City }}" hx-target="#favs">
+        <span aria-hidden="true">♡</span> <span data-ru="В избранное" data-en="Add to favorites">В избранное</span>
+    </button>
+</div>
+
+<div id="current" class="current-card" hx-swap-oob="true">
+    <div class="current-place">
+        <span class="current-kicker" data-ru="ПОГОДА СЕЙЧАС" data-en="WEATHER NOW">ПОГОДА СЕЙЧАС</span>
+        <h2>{{ .City }}</h2>
+    </div>
+    <div class="current-observation">
+        <img src="{{ .CurrentForecast.ImageSource }}" alt="" aria-hidden="true">
+        <div class="current-temp">{{ .CurrentForecast.Temperature }}<span>℃</span></div>
+    </div>
+    <div class="current-details">
+        <p class="current-feels"><span data-ru="Ощущается как" data-en="Feels like">Ощущается как</span> {{ .CurrentForecast.ApparentTemp }}℃</p>
+        <div class="current-wind"><span aria-hidden="true">↗</span> <span data-ru="Ветер" data-en="Wind">Ветер</span> {{ .CurrentForecast.WindSpeed }} <span data-ru="м/с" data-en="m/s">м/с</span></div>
+    </div>
+</div>
+
+<div class="days-heading" data-ru="Прогноз по дням" data-en="Daily forecast">Прогноз по дням</div>
+<div class="weather-grid">
+    {{range .Days}}
+    <a class="weather-card" href="/api/v1/weather/hourly?date={{ .Date }}&amp;city={{ $.City }}&amp;sunrise={{ .Sunrise }}&amp;sunset={{ .Sunset }}" hx-boost="true" hx-indicator="#weather-loading">
+        <span class="weather-day" data-date="{{ .Date }}">{{ .Time }}</span>
+        <img src="{{ .ImageSource }}" alt="" aria-hidden="true">
+        <span class="weather-temps"><strong>{{ .TemperatureMax }}°</strong><span>{{ .TemperatureMin }}°</span></span>
+        <span class="weather-description" data-description-ru="{{ .WeatherDescription }}">{{ .WeatherDescription }}</span>
+        <span class="weather-details"><span data-ru="По часам" data-en="Hourly">По часам</span> <span aria-hidden="true">↗</span></span>
+    </a>
+    {{end}}
+</div>

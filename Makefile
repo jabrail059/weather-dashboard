@@ -3,36 +3,86 @@ export
 
 export PROJECT_ROOT=$(shell pwd)
 
-build:
-	docker compose build app
+env-up:
+	@docker compose up -d dashboard-postgres dashboard-redis
 
-up:
-	docker compose up -d
+env-down:
+	@docker compose down dashboard-postgres dashboard-redis
 
-down:
-	docker compose down
+env-cleanup:
+	@read -p "Очистить все volume файлы окружения? Опасность потери данных. [y/N]:" ans; \
+	if [ "$$ans" = "y" ]; then \
+		docker compose down dashboard-postgres dashboard-redis postgres-port-forwarder redis-port-forwarder && \
+		rm -rf ${PROJECT_ROOT}/out/pgdata ${PROJECT_ROOT}/out/redisdata && \
+		echo "Файлы окружения очищены"; \
+	else \
+		echo "Очистка окружения отменена"; \
+	fi
 
-logs:
-	docker compose logs -f app
+postgres-port-forward:
+	@docker compose up -d postgres-port-forwarder
 
-restart:
-	docker compose restart app
+postgres-port-close:
+	@docker compose down postgres-port-forwarder
+
+redis-port-forward:
+	@docker compose up -d redis-port-forwarder
+
+redis-port-close:
+	@docker compose down redis-port-forwarder
+
+migrate-create:
+	@if [ -z "$(seq)" ]; then \
+		echo "Отсутствует необходимый параметр seq. Пример: make migrate-create seq=init"; \
+		exit 1;
+	fi; \
+	docker compose run --rm dashboard-migrate \
+		create \
+		-ext sql \
+		-dir=/migrations \
+		-seq "$(seq)"
+
+migrate-up:
+	@make migrate-action action=up
+
+migrate-down:
+	@make migrate-action action=down
+
+migrate-action:
+	@if [ -z "$(action)" ]; then \
+		echo "Отсутствует необходимый параметр action. Пример: make migrate-action action=up"; \
+		exit 1; \
+	fi; \
+
+	@docker compose run --rm dashboard-migrate \
+		-path=/migrations \
+		-database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@dashboard-postgres:5432/${POSTGRES_DB}?sslmode=disable \
+		"$(action)"
+
+logs-cleanup:
+	@read -p "Очистить все log файлы? Опасность потери логов. [y/N]: " ans; \
+	if [ "$$ans" = "y" ]; then \
+		rm -rf ${PROJECT_ROOT}/out/logs && \
+		echo "Файлы логов очищены"; \
+	else \
+		echo "Очистка логов отменена"; \
+	fi
 
 dashboard-run:
 	@export LOGGER_FOLDER=${PROJECT_ROOT}/out/logs && \
-	export POSTGRES_HOST=localhost && \
+	export POSTGRES_HOST=localhost REDIS_ADDR=localhost:6379 && \
 	go mod tidy && \
 	go run ${PROJECT_ROOT}/cmd/dashboard/main.go
 
-fmt:
-	go fmt ./...
+dashboard-deploy:
+	@docker compose up -d --build dashboard
 
-vet:
-	go vet ./...
+dashboard-undeploy:
+	@docker compose down dashboard
 
-test:
-	go test ./...
+ps:
+	@docker compose ps
 
 lint:
-	golangci-lint run
+	@golangci-lint run
 

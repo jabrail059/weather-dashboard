@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f6f3ed">
+    <title data-ru="Прогноз погоды" data-en="Weather forecast">Прогноз погоды</title>
+    <script>
+    (() => {
+        try { document.documentElement.lang = localStorage.getItem("weather-dashboard-language") === "en" ? "en" : "ru"; } catch {}
+        const key = "weather-dashboard-theme";
+        let saved;
+        try { saved = localStorage.getItem(key); } catch {}
+        const system = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        const apply = (theme) => {
+            document.documentElement.dataset.theme = theme;
+            document.querySelector('meta[name="theme-color"]').content = theme === "dark" ? "#101c21" : "#f6f3ed";
+        };
+        apply(saved === "dark" || saved === "light" ? saved : system);
+        if (!window.weatherThemeToggleBound) {
+            document.addEventListener("click", (event) => {
+                if (!event.target.closest("[data-theme-toggle]")) return;
+                const theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+                apply(theme);
+                try { localStorage.setItem(key, theme); } catch {}
+            });
+            window.weatherThemeToggleBound = true;
+        }
+    })();
+    </script>
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <link rel="icon" type="image/svg+xml" href="/static/icons/weather.svg">
+    <link rel="stylesheet" href="/static/styles/style.css?v=16">
+</head>
+<body class="dashboard-page">
+    <main class="dashboard-shell">
+        <header class="site-header">
+            <a class="brand" href="/" aria-label="На главную" data-ru-aria-label="На главную" data-en-aria-label="Home">
+                <span class="brand-mark" aria-hidden="true">✳</span>
+                <span><span data-ru="Погода" data-en="Weather">Погода</span><span class="brand-accent">.</span></span>
+            </a>
+            <div class="header-actions">
+                <span class="header-note" data-ru="Ваш прогноз на каждый день" data-en="Your daily forecast">Ваш прогноз на каждый день</span>
+                <div class="language-switch" role="group" aria-label="Язык / Language">
+                    <button type="button" data-language="ru" aria-pressed="true">RU</button>
+                    <button type="button" data-language="en" aria-pressed="false">EN</button>
+                </div>
+                <button type="button" class="theme-toggle" data-theme-toggle aria-label="Переключить тему" data-ru-aria-label="Переключить тему" data-en-aria-label="Switch theme">
+                    <span class="theme-moon" aria-hidden="true">☾</span>
+                    <span class="theme-sun" aria-hidden="true">☀</span>
+                    <span class="theme-label-light" data-ru="Тёмная тема" data-en="Dark theme">Тёмная тема</span>
+                    <span class="theme-label-dark" data-ru="Светлая тема" data-en="Light theme">Светлая тема</span>
+                </button>
+            </div>
+        </header>
+
+        <section class="dashboard-hero">
+            <div class="hero-copy">
+                <span class="eyebrow"><span class="eyebrow-dot"></span><span data-ru="ПРОГНОЗ РЯДОМ" data-en="FORECAST AT HAND">ПРОГНОЗ РЯДОМ</span></span>
+                <h1><span data-ru="Погода, с которой" data-en="Weather that helps you">Погода, с которой</span><br><em data-ru="легко планировать." data-en="plan ahead.">легко планировать.</em></h1>
+                <p data-ru="Найдите город и узнайте, что ждёт вас сегодня и в ближайшие дни." data-en="Find a city and see what the weather has in store today and over the coming days.">Найдите город и узнайте, что ждёт вас сегодня и в ближайшие дни.</p>
+            </div>
+            <div class="hero-art" aria-hidden="true">
+                <div class="hero-sun"></div>
+                <div class="hero-cloud hero-cloud-back"></div>
+                <div class="hero-cloud hero-cloud-front"></div>
+                <span class="hero-spark hero-spark-one">✦</span>
+                <span class="hero-spark hero-spark-two">✦</span>
+            </div>
+        </section>
+
+        <div class="dashboard-main">
+            <div class="dashboard-top">
+                <section class="search-panel" aria-label="Поиск города" data-ru-aria-label="Поиск города" data-en-aria-label="City search">
+                    <div class="panel-heading">
+                        <span class="section-kicker" data-ru="ВАШ ГОРОД" data-en="YOUR CITY">ВАШ ГОРОД</span>
+                        <h2 data-ru="Куда смотрим сегодня?" data-en="Which city today?">Куда смотрим сегодня?</h2>
+                    </div>
+                    <form hx-get="/api/v1/weather" hx-target="#result" hx-indicator="#weather-loading" class="search-form">
+                        <label for="city-search" data-ru="Название города" data-en="City name">Название города</label>
+                        <div class="search-controls">
+                            <input id="city-search" type="text" name="city" placeholder="Например, Москва" data-ru-placeholder="Например, Москва" data-en-placeholder="For example, London" autocomplete="off" required>
+                            <button type="submit"><span data-ru="Показать погоду" data-en="Show weather">Показать погоду</span> <span aria-hidden="true">→</span></button>
+                        </div>
+                    </form>
+                    {{if .Detected}}
+                    <div class="geo-suggestion">
+                        <span><span data-ru="Возможно, вы в городе" data-en="You may be in">Возможно, вы в городе</span> <strong>{{ .City }}</strong></span>
+                        <button type="button" hx-get="/api/v1/weather" hx-target="#result" hx-indicator="#weather-loading" hx-vals='{"city": "{{ .City }}"}' data-ru="Показать" data-en="Show">Показать</button>
+                    </div>
+                    {{end}}
+                </section>
+                <div id="current"></div>
+            </div>
+
+            <section class="quick-access" aria-label="Избранное и история поиска" data-ru-aria-label="Избранное и история поиска" data-en-aria-label="Favorites and search history">
+                <div id="favs" hx-get="/api/v1/favorites" hx-trigger="load, favoritesChanged from:body"></div>
+                <div id="history" hx-get="/history" hx-trigger="load, searchHistoryChanged from:body"></div>
+            </section>
+
+            <div id="request-feedback" class="request-feedback" role="alert" hidden>
+                <span class="feedback-icon" aria-hidden="true">!</span>
+                <span id="request-feedback-text"></span>
+                <button id="request-feedback-close" type="button" aria-label="Закрыть сообщение" data-ru-aria-label="Закрыть сообщение" data-en-aria-label="Dismiss message">×</button>
+            </div>
+
+            <div id="weather-loading" class="weather-loading" role="status" aria-live="polite">
+                <span class="weather-loading-spinner" aria-hidden="true"></span>
+                <span data-ru="Загружаем прогноз…" data-en="Loading forecast…">Загружаем прогноз…</span>
+            </div>
+            <div id="result"></div>
+        </div>
+    </main>
+
+    <script>
+    (() => {
+        if (window.weatherDashboardHandlersInstalled) return;
+        window.weatherDashboardHandlersInstalled = true;
+
+        const descriptions = {
+            "Ясно": "Clear sky", "Преимущественно ясно": "Mainly clear",
+            "Переменная облачность": "Partly cloudy", "Пасмурно": "Overcast",
+            "Туман": "Fog", "Иней": "Rime fog", "Легкая морось": "Light drizzle",
+            "Морось": "Drizzle", "Сильная морось": "Heavy drizzle",
+            "Ледяная морось": "Freezing drizzle", "Сильная ледяная морось": "Heavy freezing drizzle",
+            "Слабый дождь": "Light rain", "Умеренный дождь": "Moderate rain",
+            "Сильный дождь": "Heavy rain", "Слабый ледяной дождь": "Light freezing rain",
+            "Сильный ледяной дождь": "Heavy freezing rain", "Слабый снегопад": "Light snow",
+            "Умеренный снегопад": "Moderate snow", "Сильный снегопад": "Heavy snow",
+            "Мелкий зернистый снег": "Snow grains", "Слабый ливень": "Light showers",
+            "Умеренный ливень": "Moderate showers", "Сильный ливень": "Heavy showers",
+            "Небольшой снегопад": "Light snow showers", "Гроза": "Thunderstorm",
+            "Гроза с мелким градом": "Thunderstorm with small hail",
+            "Гроза с крупным градом": "Thunderstorm with large hail"
+        };
+        const errors = {
+            notFoundWeather: { ru: "Город или прогноз не найден. Проверьте название города.", en: "City or forecast not found. Check the city name." },
+            notFound: { ru: "Запись не найдена. Обновите страницу и попробуйте снова.", en: "Item not found. Refresh the page and try again." },
+            emptyCity: { ru: "Введите название города.", en: "Enter a city name." },
+            invalid: { ru: "Проверьте введённые данные и попробуйте снова.", en: "Check your input and try again." },
+            duplicate: { ru: "Этот город уже есть в избранном.", en: "This city is already in your favorites." },
+            rateLimit: { ru: "Слишком много запросов. Попробуйте немного позже.", en: "Too many requests. Try again later." },
+            connection: { ru: "Нет соединения с сервером. Проверьте сеть и попробуйте снова.", en: "Cannot connect to the server. Check your connection and try again." },
+            timeout: { ru: "Сервер отвечает слишком долго. Попробуйте ещё раз.", en: "The server is taking too long. Try again." },
+            generic: { ru: "Не удалось выполнить запрос. Попробуйте ещё раз позже.", en: "The request failed. Try again later." }
+        };
+
+        function applyLanguage() {
+            const lang = document.documentElement.lang === "en" ? "en" : "ru";
+            document.querySelectorAll("[data-ru][data-en]").forEach((element) => {
+                element.textContent = element.dataset[lang];
+            });
+            const hourlyCity = document.querySelector(".hourly-page .hourly-meta strong")?.textContent;
+            if (hourlyCity) document.title = `${lang === "en" ? "Hourly forecast" : "Почасовой прогноз"} — ${hourlyCity}`;
+            document.querySelectorAll("[data-ru-placeholder]").forEach((element) => {
+                element.placeholder = element.dataset[`${lang}Placeholder`];
+            });
+            document.querySelectorAll("[data-ru-aria-label]").forEach((element) => {
+                element.setAttribute("aria-label", element.dataset[`${lang}AriaLabel`]);
+            });
+            document.querySelectorAll("[data-language]").forEach((button) => {
+                button.setAttribute("aria-pressed", String(button.dataset.language === lang));
+            });
+            document.querySelectorAll(".weather-day[data-date]").forEach((element) => {
+                const date = new Date(`${element.dataset.date}T12:00:00Z`);
+                if (!Number.isNaN(date.getTime())) {
+                    element.textContent = new Intl.DateTimeFormat(lang === "ru" ? "ru-RU" : "en-US", {
+                        day: "numeric", month: "short", timeZone: "UTC"
+                    }).format(date);
+                }
+            });
+            document.querySelectorAll("[data-description-ru]").forEach((element) => {
+                const ru = element.dataset.descriptionRu;
+                element.textContent = lang === "en" ? descriptions[ru] || ru : ru;
+            });
+            document.querySelectorAll(".favorite-remove[data-city]").forEach((button) => {
+                button.setAttribute("aria-label", lang === "en"
+                    ? `Remove ${button.dataset.city} from favorites`
+                    : `Удалить ${button.dataset.city} из избранного`);
+            });
+            const box = document.getElementById("request-feedback");
+            if (box?.dataset.errorKey) box.querySelector("#request-feedback-text").textContent = errors[box.dataset.errorKey][lang];
+        }
+
+        window.applyWeatherLanguage = applyLanguage;
+        applyLanguage();
+
+        let hourlyDestination = null;
+        document.addEventListener("click", (event) => {
+            const day = event.target.closest(".weather-card");
+            if (day && event.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
+                hourlyDestination = day.href;
+                return;
+            }
+
+            const back = event.target.closest("[data-history-back]");
+            if (!back || hourlyDestination !== window.location.href || window.history.length < 2) return;
+
+            event.preventDefault();
+            hourlyDestination = null;
+            window.history.back();
+        });
+
+        document.addEventListener("click", (event) => {
+            const button = event.target.closest("[data-language]");
+            if (!button) return;
+            document.documentElement.lang = button.dataset.language;
+            try { localStorage.setItem("weather-dashboard-language", button.dataset.language); } catch {}
+            applyLanguage();
+        });
+
+        function syncPageClass() {
+            const hourly = Boolean(document.querySelector(".hourly-page"));
+            document.body.classList.toggle("dashboard-page", !hourly);
+            document.body.classList.toggle("hourly-body", hourly);
+        }
+
+        function feedback() {
+            return document.getElementById("request-feedback");
+        }
+
+        function clearError() {
+            const box = feedback();
+            if (!box) return;
+            box.hidden = true;
+            box.querySelector("#request-feedback-text").textContent = "";
+            delete box.dataset.errorKey;
+        }
+
+        function showError(key) {
+            const box = feedback();
+            if (!box) return;
+            box.dataset.errorKey = key;
+            box.querySelector("#request-feedback-text").textContent = errors[key][document.documentElement.lang === "en" ? "en" : "ru"];
+            box.hidden = false;
+            box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+
+        function requestPath(detail) {
+            const url = detail.xhr?.responseURL || detail.requestConfig?.path || "";
+            try {
+                return new URL(url, window.location.href).pathname;
+            } catch {
+                return "";
+            }
+        }
+
+        function errorMessage(detail) {
+            const status = detail.xhr.status;
+            const path = requestPath(detail);
+            let response;
+            try {
+                response = JSON.parse(detail.xhr.responseText);
+            } catch {
+                response = null;
+            }
+
+            if (status === 404) {
+                return path.startsWith("/api/v1/weather")
+                    ? "notFoundWeather" : "notFound";
+            }
+            if (status === 400) {
+                return response?.error?.includes("city must be not NULL")
+                    ? "emptyCity" : "invalid";
+            }
+            if (status === 409) return "duplicate";
+            if (status === 429) return "rateLimit";
+            return "generic";
+        }
+
+        document.addEventListener("click", (event) => {
+            if (event.target.closest("#request-feedback-close")) clearError();
+        });
+        document.addEventListener("htmx:beforeRequest", clearError);
+        document.addEventListener("htmx:responseError", (event) => showError(errorMessage(event.detail)));
+        document.addEventListener("htmx:sendError", () => showError("connection"));
+        document.addEventListener("htmx:timeout", () => showError("timeout"));
+        document.addEventListener("htmx:afterSwap", () => { syncPageClass(); applyLanguage(); });
+        document.addEventListener("htmx:afterSettle", applyLanguage);
+        document.addEventListener("htmx:historyRestore", () => { syncPageClass(); applyLanguage(); });
+        document.addEventListener("htmx:afterRequest", (event) => {
+            if (event.detail.successful && requestPath(event.detail) === "/api/v1/weather") {
+                htmx.trigger(document.body, "searchHistoryChanged");
+                requestAnimationFrame(() => {
+                    const forecastStart = matchMedia("(max-width: 900px)").matches
+                        ? document.getElementById("current")
+                        : document.querySelector(".dashboard-top");
+                    forecastStart?.scrollIntoView({
+                        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+                        block: "start"
+                    });
+                });
+            }
+        });
+
+        const city = new URLSearchParams(window.location.search).get("city");
+        if (city) {
+            document.getElementById("city-search").value = city;
+            document.addEventListener("DOMContentLoaded", () => {
+                htmx.ajax("GET", "/api/v1/weather", {
+                    source: document.querySelector(".search-form"),
+                    target: "#result",
+                    values: { city }
+                });
+            }, { once: true });
+        }
+    })();
+    </script>
+</body>
+</html>

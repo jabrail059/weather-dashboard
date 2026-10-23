@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f6f3ed">
+    <title>Почасовой прогноз — {{ .City }}</title>
+    <script>
+    (() => {
+        try { document.documentElement.lang = localStorage.getItem("weather-dashboard-language") === "en" ? "en" : "ru"; } catch {}
+        const key = "weather-dashboard-theme";
+        let saved;
+        try { saved = localStorage.getItem(key); } catch {}
+        const system = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        const apply = (theme) => {
+            document.documentElement.dataset.theme = theme;
+            document.querySelector('meta[name="theme-color"]').content = theme === "dark" ? "#101c21" : "#f6f3ed";
+        };
+        apply(saved === "dark" || saved === "light" ? saved : system);
+        if (!window.weatherThemeToggleBound) {
+            document.addEventListener("click", (event) => {
+                if (!event.target.closest("[data-theme-toggle]")) return;
+                const theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+                apply(theme);
+                try { localStorage.setItem(key, theme); } catch {}
+            });
+            window.weatherThemeToggleBound = true;
+        }
+    })();
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/static/icons/weather.svg">
+    <link rel="stylesheet" href="/static/styles/style.css?v=16">
+</head>
+<body class="hourly-body">
+    <main class="hourly-page">
+        <div class="hourly-shell">
+            <nav class="hourly-nav" aria-label="Навигация" data-ru-aria-label="Навигация" data-en-aria-label="Navigation">
+                <a href="/?city={{ .City }}" class="inline-btn" data-history-back><span aria-hidden="true">←</span> <span data-ru="На главную" data-en="Back to home">На главную</span></a>
+                <div class="hourly-actions">
+                    <div class="language-switch" role="group" aria-label="Язык / Language">
+                        <button type="button" data-language="ru" aria-pressed="true">RU</button>
+                        <button type="button" data-language="en" aria-pressed="false">EN</button>
+                    </div>
+                    <button type="button" class="theme-toggle" data-theme-toggle aria-label="Переключить тему" data-ru-aria-label="Переключить тему" data-en-aria-label="Switch theme">
+                        <span class="theme-moon" aria-hidden="true">☾</span>
+                        <span class="theme-sun" aria-hidden="true">☀</span>
+                        <span class="theme-label-light" data-ru="Тёмная тема" data-en="Dark theme">Тёмная тема</span>
+                        <span class="theme-label-dark" data-ru="Светлая тема" data-en="Light theme">Светлая тема</span>
+                    </button>
+                </div>
+            </nav>
+
+            <header class="hourly-header">
+                <span class="section-kicker" data-ru="ПРОГНОЗ ПО ЧАСАМ" data-en="HOURLY FORECAST">ПРОГНОЗ ПО ЧАСАМ</span>
+                <h1 class="hourly-title" data-ru="Каждый час под рукой." data-en="Your forecast, hour by hour.">Каждый час под рукой.</h1>
+                <div class="hourly-meta"><strong>{{ .City }}</strong><span class="hourly-dot"></span><span>{{ .Date }}</span></div>
+            </header>
+
+            <div class="daylight-row">
+                <div class="daylight-chip sunrise"><img src="/static/icons/sunrise.svg" alt=""><span><span data-ru="Восход" data-en="Sunrise">Восход</span> <strong>{{ .Sunrise }}</strong></span></div>
+                <div class="daylight-chip sunset"><img src="/static/icons/sunset.svg" alt=""><span><span data-ru="Закат" data-en="Sunset">Закат</span> <strong>{{ .Sunset }}</strong></span></div>
+            </div>
+
+            {{template "hourly_base.html" .}}
+        </div>
+    </main>
+    <script>
+    (() => {
+        if (window.applyWeatherLanguage) {
+            window.applyWeatherLanguage();
+            return;
+        }
+        function applyLanguage() {
+            const lang = document.documentElement.lang === "en" ? "en" : "ru";
+            const city = document.querySelector(".hourly-meta strong")?.textContent;
+            if (city) document.title = `${lang === "en" ? "Hourly forecast" : "Почасовой прогноз"} — ${city}`;
+            document.querySelectorAll("[data-ru][data-en]").forEach((element) => {
+                element.textContent = element.dataset[lang];
+            });
+            document.querySelectorAll("[data-ru-aria-label]").forEach((element) => {
+                element.setAttribute("aria-label", element.dataset[`${lang}AriaLabel`]);
+            });
+            document.querySelectorAll("[data-language]").forEach((button) => {
+                button.setAttribute("aria-pressed", String(button.dataset.language === lang));
+            });
+        }
+        window.applyWeatherLanguage = applyLanguage;
+        document.addEventListener("click", (event) => {
+            const button = event.target.closest("[data-language]");
+            if (!button) return;
+            document.documentElement.lang = button.dataset.language;
+            try { localStorage.setItem("weather-dashboard-language", button.dataset.language); } catch {}
+            applyLanguage();
+        });
+        applyLanguage();
+    })();
+    </script>
+</body>
+</html>

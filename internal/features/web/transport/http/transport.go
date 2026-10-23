@@ -35,7 +35,6 @@ func NewWebHTTPHadnler(
 func (h *WebHTTPHandler) Routes() []core_http_server.Route {
 	return []core_http_server.Route{
 		{
-			Method:  http.MethodGet,
 			Path:    "/",
 			Handler: h.GetMainPage,
 		},

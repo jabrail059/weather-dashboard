@@ -103,7 +103,7 @@ func (h *HTTPResponseHandler) HTMXMethodErrorResponse() {
 }
 
 func (h *HTTPResponseHandler) RenderPartHTML(data any, file string) error {
-	path := fmt.Sprintf("templates/%s", file)
+	path := fmt.Sprintf("public/templates/%s", file)
 	tmpl, err := template.ParseFiles(path)
 	if err != nil {
 		slog.Warn("ошибка парсинга страницы: " + err.Error())
@@ -125,7 +125,7 @@ func (h *HTTPResponseHandler) RenderHTML(data any, file []string) error {
 
 	paths := make([]string, len(file))
 	for i, path := range file {
-		path = fmt.Sprintf("templates/%s", path)
+		path = fmt.Sprintf("public/templates/%s", path)
 		paths[i] = path
 	}
 

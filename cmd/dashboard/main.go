@@ -126,7 +126,7 @@ func main() {
 
 	httpServer.RegisterRoutes(webHTTPHandler.Routes()...)
 
-	httpServer.RegisterStaticFiles("/static/", "./static")
+	httpServer.RegisterStaticFiles("/static/", "./public/static")
 
 	if err := httpServer.Run(ctx); err != nil {
 		logger.Error("HTTP server run error", zap.Error(err))
