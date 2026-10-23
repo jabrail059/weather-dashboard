@@ -3,315 +3,169 @@
 [![Check](https://github.com/jabrail059/weather-dashboard/actions/workflows/check.yml/badge.svg)](https://github.com/jabrail059/weather-dashboard/actions/workflows/check.yml)
 [![Build](https://github.com/jabrail059/weather-dashboard/actions/workflows/build.yml/badge.svg)](https://github.com/jabrail059/weather-dashboard/actions/workflows/build.yml)
 [![Go](https://img.shields.io/badge/Go-1.25.6-00ADD8?logo=go&logoColor=white)](https://go.dev/)
-[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 
-A server-rendered weather dashboard built with Go, Chi, HTMX, SQLite, and Redis.
-
-The application provides current weather conditions, a seven-day forecast, hourly forecast details, favorite cities, and recent search history. Weather data comes from the Open-Meteo API, while Go HTML templates and HTMX provide a responsive interface without a client-side application framework.
+A server-rendered weather dashboard built with Go, HTMX, PostgreSQL, and Redis. It shows current conditions, a seven-day forecast, and hourly weather for a selected day. The interface supports English and Russian, plus light and dark themes.
 
 ## Screenshots
 
-### Main dashboard
+The screenshots show the English interface with a forecast for London.
 
-![Main dashboard](docs/screenshots/home.png)
+### Dashboard
+
+![Weather dashboard in English showing London's current weather and seven-day forecast](docs/screenshots/home.png)
 
 ### Hourly forecast
 
-![Hourly forecast](docs/screenshots/hourly.png)
+![Hourly forecast in English for London](docs/screenshots/hourly.png)
 
 ## Features
 
-- Search for weather by city
-- View current weather conditions
-- View a seven-day forecast
-- Open hourly forecast details for a selected day
-- Add and remove favorite cities
-- Review recent search history
-- Use an automatically detected city suggestion
+- Search for a city and view current conditions and a seven-day forecast
+- Open an hourly forecast for any day in the forecast
+- Save favorite cities and revisit recent searches
+- Show a suggested city when IP geolocation is available
+- Switch between English and Russian, and between light and dark themes
 
-## Technical Highlights
+## Stack and architecture
 
-- Server-side rendering with Go HTML templates
-- HTTP routing with Chi
-- Partial page updates with HTMX
-- Weather data retrieval from Open-Meteo
-- Redis caching for external API responses
-- SQLite persistence for favorites and search history
-- Cookie-based user sessions
-- Graceful shutdown of the HTTP server and storage connections
-- Docker Compose environment for the application and Redis
-- Automated linting, tests, and Docker image builds with GitHub Actions
+| Area | Implementation |
+| --- | --- |
+| Backend | Go 1.25.6, `net/http` |
+| UI | Go HTML templates, HTMX, CSS, JavaScript |
+| Weather and geocoding | Open-Meteo |
+| Suggested city | ip-api |
+| Persistent data | PostgreSQL (cities and favorites) |
+| Cache and recent searches | Redis |
+| Deployment | Docker Compose |
+| CI | GitHub Actions, golangci-lint, `go test`, Docker build |
 
-## Tech Stack
-
-| Area | Technology |
-|---|---|
-| Language | Go 1.25.6 |
-| HTTP router | Chi |
-| Rendering | Go HTML templates, HTMX |
-| Frontend | HTML, CSS |
-| Database | SQLite |
-| Cache | Redis |
-| Weather API | Open-Meteo |
-| Testing | Go testing package, Testify |
-| Infrastructure | Docker, Docker Compose |
-| CI | GitHub Actions, golangci-lint |
-
-## Architecture
-
-The project follows a layered structure that keeps HTTP handling, application logic, persistence, external API access, and rendering separate.
+The browser requests HTML pages and HTMX fragments from the Go server. Forecast services look up city coordinates in PostgreSQL or Open-Meteo, then use Redis to cache weather responses. Favorites are stored in PostgreSQL, while recent searches are stored in Redis. A cookie associates favorites and search history with a browser session.
 
 ```text
-Browser
-   │
-   ▼
-Chi router
-   │
-   ▼
-HTTP handlers
-   │
-   ▼
-Service layer
-   ├── Open-Meteo API
-   ├── Redis cache
-   └── SQLite storage
-   │
-   ▼
-Go HTML templates and HTMX responses
+Browser (HTML + HTMX)
+          │
+          ▼
+Go HTTP handlers and services
+          ├── Open-Meteo and ip-api
+          ├── PostgreSQL: cities, favorites
+          └── Redis: forecasts, favorites cache, recent searches
 ```
 
-Main package responsibilities:
+## Quick start with Docker Compose
 
-- `internal/handlers` — HTTP request handling and response preparation
-- `internal/service` — application logic and weather data processing
-- `internal/storage/sqlite` — favorites and search history persistence
-- `internal/storage/redis` — weather response caching
-- `internal/session` — cookie-based session handling
-- `internal/view` — template rendering
-- `internal/server` — route and static file configuration
-- `internal/app` — application dependency initialization
-
-## Project Structure
-
-```text
-.
-├── cmd/app/                 # Application entry point
-├── docs/screenshots/        # README screenshots
-├── internal/
-│   ├── app/                 # Dependency initialization
-│   ├── config/              # Environment configuration
-│   ├── handlers/            # HTTP handlers
-│   ├── models/              # Application models
-│   ├── server/              # Router configuration
-│   ├── service/             # Application and weather logic
-│   ├── session/             # User session handling
-│   ├── storage/
-│   │   ├── redis/           # Redis cache
-│   │   └── sqlite/          # SQLite storage
-│   ├── view/                # Template rendering
-│   └── weather/             # Weather code descriptions
-├── migrations/              # SQLite migrations
-├── static/                  # CSS and static assets
-├── templates/               # Go HTML templates
-├── Dockerfile
-├── docker-compose.yml
-└── Makefile
-```
-
-## Quick Start
-
-### Requirements
-
-- Docker
-- Docker Compose
-- GNU Make for the recommended commands
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/jabrail059/weather-dashboard.git
-cd weather-dashboard
-```
-
-### 2. Create the environment file
+Install Docker, Docker Compose, and GNU Make. From the project directory:
 
 ```bash
 cp .env.example .env
 ```
 
-The provided example is configured for Docker Compose:
+Set the required values in `.env`. For a local Compose setup, the blank entries can be filled as follows; choose your own PostgreSQL password:
 
 ```env
-APP_PORT=8081
-SQLITE_PATH=/data/weather.db
-REDIS_ADDR=redis:6379
+POSTGRES_USER=dashboard
+POSTGRES_PASSWORD=your-password
+POSTGRES_DB=weather
+REDIS_ADDR=dashboard-redis:6379
 REDIS_PASSWORD=
-REDIS_DB=0
+GEOCODING_BASE_URL=https://geocoding-api.open-meteo.com/v1/search
+FORECAST_BASE_URL=https://api.open-meteo.com/v1/forecast
+IP_API_BASE_URL=http://ip-api.com/json
 ```
 
-### 3. Build and start the application
-
-The Makefile is the recommended command interface for this project:
+Keep the HTTP settings and other defaults from `.env.example`. Then start the data services, apply the database migration, and build and start the dashboard:
 
 ```bash
-make build
-make up
+make env-up
+make migrate-up
+make dashboard-deploy
 ```
 
-Open the application at:
+Open [http://localhost:8081](http://localhost:8081). Use the **EN** button in the header to switch to English; the language and theme choices are saved in the browser.
 
-```text
-http://localhost:8081
-```
-
-SQLite data is persisted in the local `data/` directory.
-
-View application logs:
+Check the containers with `make ps`. To stop the Compose stack, run:
 
 ```bash
-make logs
+PROJECT_ROOT="$PWD" docker compose down
 ```
 
-Stop the application:
+PostgreSQL, Redis, and application logs are stored under `out/`. The migration creates the `dashboard.cities` and `dashboard.favorites` tables.
+
+## Local development
+
+Install Go 1.25.6 or newer. Start PostgreSQL and Redis with Compose, apply the migration, and expose their ports on localhost:
 
 ```bash
-make down
+make env-up
+make migrate-up
+make postgres-port-forward
+make redis-port-forward
+make dashboard-run
 ```
 
-### Without Make
+`make dashboard-run` loads `.env`, sets the PostgreSQL and Redis hosts to `localhost`, runs `go mod tidy`, and starts `cmd/dashboard/main.go`. The dashboard is available at [http://localhost:8081](http://localhost:8081).
 
-Use the equivalent Docker Compose command:
+## Makefile commands
 
-```bash
-docker compose up --build -d
-```
-
-To view logs and stop the services:
-
-```bash
-docker compose logs -f app
-docker compose down
-```
-
-## Local Development
-
-### Requirements
-
-- Go 1.25.6 or newer
-- Redis
-
-For local development outside Docker, update `.env` to use local paths and the local Redis address:
-
-```env
-APP_PORT=8081
-SQLITE_PATH=./data/weather.db
-REDIS_ADDR=localhost:6379
-REDIS_PASSWORD=
-REDIS_DB=0
-```
-
-Create the data directory and download dependencies:
-
-```bash
-mkdir -p data
-go mod download
-```
-
-Run the application through the Makefile:
-
-```bash
-make run
-```
-
-Equivalent direct command:
-
-```bash
-go run ./cmd/app/
-```
-
-The application will be available at `http://localhost:8081`.
-
-## Makefile Commands
-
-The Makefile provides a small, consistent interface for common development and Docker tasks.
-
-| Command | Purpose | Equivalent command |
-|---|---|---|
-| `make build` | Build the application image | `docker compose build app` |
-| `make up` | Start the services in the background | `docker compose up -d` |
-| `make down` | Stop and remove the services | `docker compose down` |
-| `make logs` | Follow application logs | `docker compose logs -f app` |
-| `make restart` | Restart the application container | `docker compose restart app` |
-| `make run` | Run the application locally | `go run ./cmd/app/` |
-| `make fmt` | Format Go source files | `go fmt ./...` |
-| `make vet` | Run static checks with `go vet` | `go vet ./...` |
-| `make test` | Run the complete test suite | `go test ./...` |
-
-Using Make is recommended because it keeps project commands short and consistent. The equivalent commands are documented so the project remains easy to use on systems where `make` is unavailable.
+| Command | Purpose |
+| --- | --- |
+| `make env-up` | Start PostgreSQL and Redis |
+| `make migrate-up` | Apply database migrations |
+| `make dashboard-deploy` | Build and start the dashboard container |
+| `make dashboard-run` | Run the dashboard locally with Go |
+| `make postgres-port-forward` | Expose PostgreSQL on `127.0.0.1:5432` |
+| `make redis-port-forward` | Expose Redis on `127.0.0.1:6379` |
+| `make ps` | Show Compose service status |
 
 ## Configuration
 
-| Variable | Description | Docker Compose value |
-|---|---|---|
-| `APP_PORT` | HTTP port used by the application. Keep it at `8081` with the current Docker Compose configuration | `8081` |
-| `SQLITE_PATH` | Path to the SQLite database file | `/data/weather.db` |
-| `REDIS_ADDR` | Redis server address | `redis:6379` |
-| `REDIS_PASSWORD` | Redis password; leave empty when authentication is disabled | empty |
-| `REDIS_DB` | Redis database index | `0` |
+The application reads these settings from the environment. Docker Compose and the Makefile load `.env` for the commands above.
 
-## HTTP Routes
+| Variable | Purpose |
+| --- | --- |
+| `HTTP_ADDR` | Address for the HTTP server; `.env.example` uses `:8081` |
+| `HTTP_SHUTDOWN_TIMEOUT` | Graceful shutdown timeout |
+| `HTTP_ALLOWED_ORIGINS` | Allowed origins for CORS |
+| `POSTGRES_HOST`, `POSTGRES_PORT` | PostgreSQL host and port; port defaults to `5432` |
+| `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | PostgreSQL credentials and database |
+| `POSTGRES_TIMEOUT` | PostgreSQL operation timeout |
+| `REDIS_ADDR`, `REDIS_PASSWORD`, `REDIS_DB` | Redis connection settings |
+| `GEOCODING_BASE_URL` | Open-Meteo geocoding endpoint |
+| `FORECAST_BASE_URL` | Open-Meteo forecast endpoint |
+| `IP_API_BASE_URL` | Base URL for IP geolocation |
+| `LOGGER_LEVEL`, `LOGGER_FOLDER` | Log level and output folder; the run commands set the folder |
+| `TIME_ZONE` | Application time zone; defaults to `UTC` |
 
-| Method | Route | Description |
-|---|---|---|
-| `GET` | `/` | Main dashboard |
-| `GET` | `/weather` | Weather forecast for a selected city |
-| `GET` | `/weather/hourly` | Hourly forecast for a selected day |
-| `GET` | `/favorites` | Favorite cities |
-| `POST` | `/favorites/add` | Add a city to favorites |
-| `DELETE` | `/favorites/delete` | Remove a city from favorites |
-| `GET` | `/searchhistory` | Recent search history |
+## HTTP routes
 
-## Testing and Code Quality
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/` | Dashboard page |
+| `GET` | `/history` | Recent search HTML fragment |
+| `GET` | `/api/v1/weather?city=London` | Current weather and seven-day forecast HTML fragment |
+| `GET` | `/api/v1/weather/hourly` | Hourly page; requires `date`, `city`, `sunrise`, and `sunset` query parameters |
+| `GET` | `/api/v1/favorites` | Favorite cities HTML fragment |
+| `POST` | `/api/v1/favorites?city=London` | Add a favorite |
+| `DELETE` | `/api/v1/favorites?city=London` | Remove a favorite |
 
-Run the complete test suite:
+The HTML fragment routes are used by HTMX; use the page controls to request them from a browser.
 
-```bash
-make test
+## Project layout
+
+```text
+cmd/dashboard/          Application entry point and Dockerfile
+internal/core/          Configuration, HTTP server, logging, shared domain types
+internal/features/      Forecast, favorites, and web features
+migrations/             PostgreSQL schema migrations
+public/templates/       Go HTML templates
+public/static/          Styles and weather icons
+docs/screenshots/       README screenshots
 ```
 
-Run formatting and static checks:
-
-```bash
-make fmt
-make vet
-```
-
-The current test suite includes:
-
-- Unit tests for service-layer data processing and validation
-- Integration tests for SQLite storage
-
-Direct command equivalents:
+## Checks
 
 ```bash
 go test ./...
-go fmt ./...
 go vet ./...
 ```
 
-## Continuous Integration
-
-GitHub Actions runs two workflows:
-
-- **Check** — runs `golangci-lint`, then executes the test suite with the configured Go version matrix
-- **Build** — verifies that the Docker image builds successfully on pushes to `main`
-
-## Request Flow
-
-1. The user searches for a city.
-2. The application resolves the city's coordinates.
-3. The service checks Redis for cached weather data.
-4. If the cache does not contain the response, the service requests it from Open-Meteo.
-5. The service processes the response into application models.
-6. Go templates render the page or HTMX fragment.
-7. Favorites and search history are stored in SQLite and associated with the user's session.
+GitHub Actions runs golangci-lint and `go test ./...` on pushes, and builds the Docker image on pushes to `main`.

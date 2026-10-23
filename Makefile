@@ -83,6 +83,4 @@ dashboard-undeploy:
 ps:
 	@docker compose ps
 
-lint:
-	@golangci-lint run
 
