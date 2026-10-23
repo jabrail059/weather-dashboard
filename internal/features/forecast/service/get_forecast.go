@@ -44,6 +44,9 @@ func (s *ForecastService) GetForecast(
 	forecast, err := s.forecastRedisRepository.GetForecast(
 		ctx, latitude, longitude,
 	)
+
+	needsCaching := err != nil
+
 	if err != nil {
 		if !errors.Is(err, core_redis_client.ErrKeyNotFound) {
 			cacheErr = fmt.Errorf("get forecast from cache: %w", err)
@@ -75,9 +78,13 @@ func (s *ForecastService) GetForecast(
 			return forecast, fmt.Errorf("postgres error: %w", err)
 		}
 	}
-	if err := s.forecastRedisRepository.AddForecast(ctx, forecast); err != nil {
-		cacheErr = errors.Join(cacheErr, fmt.Errorf("save forecast in cache: %w", err))
+
+	if needsCaching {
+		if err := s.forecastRedisRepository.AddForecast(ctx, forecast); err != nil {
+			cacheErr = errors.Join(cacheErr, fmt.Errorf("save forecast in cache: %w", err))
+		}
 	}
+
 	if err := s.forecastRedisRepository.AddSearchHistory(ctx, *city, value); err != nil {
 		cacheErr = errors.Join(cacheErr, fmt.Errorf("save search history in cache: %w", err))
 	}
