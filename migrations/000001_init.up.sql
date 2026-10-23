@@ -12,5 +12,6 @@ CREATE TABLE dashboard.favorites (
     session_id TEXT NOT NULL,
     name VARCHAR(30) NOT NULL CHECK(char_length(name) BETWEEN 1 AND 30),
     created_at TIMESTAMPTZ NOT NULL,
-    last_seen_at TIMESTAMPTZ NOT NULL
+    last_seen_at TIMESTAMPTZ NOT NULL,
+    UNIQUE (session_id, name)
 );

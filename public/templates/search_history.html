@@ -1,0 +1,10 @@
+{{if .Presence}}
+<section class="searchhistory">
+    <div class="list-heading"><span class="list-heading-icon" aria-hidden="true">↺</span><h3 data-ru="Недавно искали" data-en="Recent searches">Недавно искали</h3></div>
+    <div class="history-chips">
+        {{range .Cities}}
+        <button class="history-chip" type="button" hx-get="/api/v1/weather?city={{ . }}" hx-target="#result" hx-indicator="#weather-loading">{{ . }}</button>
+        {{end}}
+    </div>
+</section>
+{{end}}

@@ -19,7 +19,9 @@ func (r *ForecastOpenmeteoRepository) GetHourlyForecast(
 	latitude float64,
 	longitude float64,
 ) (domain.OneDayForecast, error) {
-	var hourlyResponse HourlyResponse
+	var response struct {
+		Hourly HourlyResponse `json:"hourly"`
+	}
 
 	params := map[string]string{
 		"latitude":  strconv.FormatFloat(latitude, 'f', -1, 64),
@@ -39,12 +41,12 @@ func (r *ForecastOpenmeteoRepository) GetHourlyForecast(
 	err = r.getResponseFromOpenMeteo(
 		ctx,
 		apiURL,
-		&hourlyResponse,
+		&response,
 	)
 	if err != nil {
 		return domain.OneDayForecast{}, fmt.Errorf("get response from openmeteo: %w", err)
 	}
 
-	oneDayForecast := hourlyForecastFromResponse(hourlyResponse)
+	oneDayForecast := hourlyForecastFromResponse(response.Hourly)
 	return oneDayForecast, nil
 }

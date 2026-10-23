@@ -1,2 +1,0 @@
-ALTER TABLE dashboard.favorites
-DROP CONSTRAINT favorites_session_id_name_key;
