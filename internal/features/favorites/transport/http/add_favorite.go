@@ -8,6 +8,22 @@ import (
 	core_http_session "github.com/jabrail059/weather-dashboard/internal/core/transport/http/session"
 )
 
+type AddFavoriteResponse struct {
+	Cities   []string `json:"cities" example:"Moscow,Berlin"`
+	Presence bool     `json:"presence" example:"true"`
+}
+
+// AddFavorite 	godoc
+// @Summary 	Добавить в избранные
+// @Description Добавить населенный пункт в список избранных, сохраненных в системе
+// @Tags 		favorites
+// @Produce 	json
+// @Param 		city		query		string			true				"Название населенного пункта"
+// @Success 	200 		{object}	AddFavoriteResponse					"Успешное добавление населенного пункта в список избранных"
+// @Failure 	400 		{object} 	core_http_response.ErrorResponse 	"Bad Request"
+// @Failure 	404 		{object} 	core_http_response.ErrorResponse 	"Not Found"
+// @Failure 	500 		{object} 	core_http_response.ErrorResponse 	"Internal Server Error"
+// @Router 		/favorites 	[post]
 func (h *FavoritesHTTPHander) AddFavorite(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := core_logger.FromContext(ctx)
@@ -21,7 +37,7 @@ func (h *FavoritesHTTPHander) AddFavorite(w http.ResponseWriter, r *http.Request
 	}
 	value := cookie.Value
 
-	cities, err := h.favoritesService.AddFavorite(ctx, city, value)
+	favoritesList, err := h.favoritesService.AddFavorite(ctx, city, value)
 	if err != nil {
 		responseHandler.ErrorResponse(
 			err,
@@ -31,10 +47,14 @@ func (h *FavoritesHTTPHander) AddFavorite(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if cities.CacheErr != nil {
-		log.WarnError("cache error", cities.CacheErr)
+	if favoritesList.CacheErr != nil {
+		log.WarnError("cache error", favoritesList.CacheErr)
 	}
 
+	var response AddFavoriteResponse
+	response.Cities = favoritesList.Cities
+	response.Presence = favoritesList.Presence
+
 	w.Header().Set("HX-Trigger", "favoritesChanged")
-	responseHandler.NoContentResponse()
+	responseHandler.JSONResponse(response, http.StatusOK)
 }
