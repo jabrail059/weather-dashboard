@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jabrail059/weather-dashboard/internal/core/domain"
-	core_http_utils "github.com/jabrail059/weather-dashboard/internal/core/transport/utils"
+	core_http_utils "github.com/jabrail059/weather-dashboard/internal/core/transport/http/utils"
 )
 
 type CityReport struct {

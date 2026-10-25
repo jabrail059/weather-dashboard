@@ -9,6 +9,18 @@ import (
 	core_http_session "github.com/jabrail059/weather-dashboard/internal/core/transport/http/session"
 )
 
+// GetForecast 	godoc
+// @Summary 	Получить прогноз
+// @Description Получить данные о прогнозе погоды на неделю
+// @Tags 		forecast
+// @Produce 	html,json
+// @Param 		city 		query 		string 		true					"Название населенного пункта"
+// @Param 		HX-Request 	header 		string 		true					"Заголовок HTMX" Enums(true)
+// @Success 	200 		{string} 	string 								"HTML forecast fragment"
+// @Failure 	400 		{object} 	core_http_response.ErrorResponse 	"Bad Request"
+// @Failure 	404 		{object} 	core_http_response.ErrorResponse 	"Not Found"
+// @Failure 	500 		{object} 	core_http_response.ErrorResponse 	"Internal Server Error"
+// @Router 		/weather 	[get]
 func (h *ForecastHTTPHandler) GetForecast(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := core_logger.FromContext(ctx)

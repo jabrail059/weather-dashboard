@@ -8,6 +8,17 @@ import (
 	core_http_session "github.com/jabrail059/weather-dashboard/internal/core/transport/http/session"
 )
 
+// DeleteFavorites 	godoc
+// @Summary 		Удалить из избранных
+// @Description 	Удалить населенный пункт из списка избранных, сохраненных в системе
+// @Tags 			favorites
+// @Produce 		json
+// @Param 			city 		query 		string 		true					"Название удаляемого населенного пункта"
+// @Success 		204															"Успешное удаление населенного пункта"
+// @Failure 		400 		{object} 	core_http_response.ErrorResponse 	"Bad Request"
+// @Failure 		404 		{object} 	core_http_response.ErrorResponse 	"Not Found"
+// @Failure 		500 		{object} 	core_http_response.ErrorResponse 	"Internal Server Error"
+// @Router 			/favorites 	[delete]
 func (h *FavoritesHTTPHander) DeleteFavorite(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := core_logger.FromContext(ctx)

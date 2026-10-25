@@ -31,6 +31,11 @@ import (
 	"go.uber.org/zap"
 )
 
+// @title 			Go Weather Dashboard API
+// @version 		1.0
+// @description 	Weather Dashboard Application REST-API scheme
+// @host 			127.0.0.1:8081
+// @BasePath 		/api/v1
 func main() {
 	cfg := core_config.NewConfigMust()
 	time.Local = cfg.TimeZone
@@ -126,6 +131,7 @@ func main() {
 	)
 
 	httpServer.RegisterRoutes(webHTTPHandler.Routes()...)
+	httpServer.RegisterSwagger()
 
 	httpServer.RegisterStaticFiles("/static/", "./public/static")
 

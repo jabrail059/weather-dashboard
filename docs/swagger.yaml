@@ -1,0 +1,203 @@
+basePath: /api/v1
+definitions:
+  github_com_jabrail059_weather-dashboard_internal_core_transport_http_response.ErrorResponse:
+    properties:
+      error:
+        example: full error text
+        type: string
+      message:
+        example: short human-readbe message
+        type: string
+    type: object
+  internal_features_favorites_transport_http.AddFavoriteResponse:
+    properties:
+      cities:
+        example:
+        - Moscow
+        - Berlin
+        items:
+          type: string
+        type: array
+      presence:
+        example: true
+        type: boolean
+    type: object
+host: 127.0.0.1:8081
+info:
+  contact: {}
+  description: Weather Dashboard Application REST-API scheme
+  title: Go Weather Dashboard API
+  version: "1.0"
+paths:
+  /favorites:
+    delete:
+      description: Удалить населенный пункт из списка избранных, сохраненных в системе
+      parameters:
+      - description: Название удаляемого населенного пункта
+        in: query
+        name: city
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Успешное удаление населенного пункта
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_jabrail059_weather-dashboard_internal_core_transport_http_response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_jabrail059_weather-dashboard_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_jabrail059_weather-dashboard_internal_core_transport_http_response.ErrorResponse'
+      summary: Удалить из избранных
+      tags:
+      - favorites
+    get:
+      description: Получить список избранных населенных пунктов, сохраненных в системе
+      produces:
+      - text/html
+      - application/json
+      responses:
+        "200":
+          description: HTML favorites fragment
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_jabrail059_weather-dashboard_internal_core_transport_http_response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_jabrail059_weather-dashboard_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_jabrail059_weather-dashboard_internal_core_transport_http_response.ErrorResponse'
+      summary: Получить избранные
+      tags:
+      - favorites
+    post:
+      description: Добавить населенный пункт в список избранных, сохраненных в системе
+      parameters:
+      - description: Название населенного пункта
+        in: query
+        name: city
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешное добавление населенного пункта в список избранных
+          schema:
+            $ref: '#/definitions/internal_features_favorites_transport_http.AddFavoriteResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_jabrail059_weather-dashboard_internal_core_transport_http_response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_jabrail059_weather-dashboard_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_jabrail059_weather-dashboard_internal_core_transport_http_response.ErrorResponse'
+      summary: Добавить в избранные
+      tags:
+      - favorites
+  /weather:
+    get:
+      description: Получить данные о прогнозе погоды на неделю
+      parameters:
+      - description: Название населенного пункта
+        in: query
+        name: city
+        required: true
+        type: string
+      - description: Заголовок HTMX
+        enum:
+        - "true"
+        in: header
+        name: HX-Request
+        required: true
+        type: string
+      produces:
+      - text/html
+      - application/json
+      responses:
+        "200":
+          description: HTML forecast fragment
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_jabrail059_weather-dashboard_internal_core_transport_http_response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_jabrail059_weather-dashboard_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_jabrail059_weather-dashboard_internal_core_transport_http_response.ErrorResponse'
+      summary: Получить прогноз
+      tags:
+      - forecast
+  /weather/hourly:
+    get:
+      description: Получить данные о почасовом прогнозе погоды на день
+      parameters:
+      - description: 'Дата прогноза погоды, формат: YYYY-MM-DD'
+        format: date
+        in: query
+        name: date
+        required: true
+        type: string
+      - description: Название населенного пункта
+        in: query
+        name: city
+        required: true
+        type: string
+      - description: 'Время восхода солнца, формат: HH:mm'
+        in: query
+        name: sunrise
+        required: true
+        type: string
+      - description: 'Время закат солнца, формат: HH:mm'
+        in: query
+        name: sunset
+        required: true
+        type: string
+      produces:
+      - text/html
+      - application/json
+      responses:
+        "200":
+          description: HTML hourly forecast page
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_jabrail059_weather-dashboard_internal_core_transport_http_response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_jabrail059_weather-dashboard_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_jabrail059_weather-dashboard_internal_core_transport_http_response.ErrorResponse'
+      summary: Получить почасовой прогноз
+      tags:
+      - forecast
+swagger: "2.0"

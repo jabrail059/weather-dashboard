@@ -3,6 +3,8 @@
 [![Check](https://github.com/jabrail059/weather-dashboard/actions/workflows/check.yml/badge.svg)](https://github.com/jabrail059/weather-dashboard/actions/workflows/check.yml)
 [![Build](https://github.com/jabrail059/weather-dashboard/actions/workflows/build.yml/badge.svg)](https://github.com/jabrail059/weather-dashboard/actions/workflows/build.yml)
 [![Go](https://img.shields.io/badge/Go-1.25.6-00ADD8?logo=go&logoColor=white)](https://go.dev/)
+[![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](docker-compose.yml)
+[![Swagger 2.0](https://img.shields.io/badge/Swagger-2.0-85EA2D?logo=swagger&logoColor=black)](docs/swagger.yaml)
 
 A server-rendered weather dashboard built with Go, HTMX, PostgreSQL, and Redis. It shows current conditions, a seven-day forecast, and hourly weather for a selected day. The interface supports English and Russian, plus light and dark themes.
 
@@ -104,6 +106,16 @@ make dashboard-run
 
 `make dashboard-run` loads `.env`, sets the PostgreSQL and Redis hosts to `localhost`, runs `go mod tidy`, and starts `cmd/dashboard/main.go`. The dashboard is available at [http://localhost:8081](http://localhost:8081).
 
+## API documentation
+
+Open [Swagger UI](http://127.0.0.1:8081/swagger/index.html) after starting the dashboard. Use this address for Swagger because the API host in the specification is `127.0.0.1:8081`. It documents the `/api/v1` routes and lets you send requests from the browser. The weather and favorites GET endpoints return HTML; error responses return JSON.
+
+After changing API annotations, regenerate `docs/docs.go`, `docs/swagger.json`, and `docs/swagger.yaml` with Docker Compose:
+
+```bash
+make swagger-gen
+```
+
 ## Makefile commands
 
 | Command | Purpose |
@@ -112,6 +124,7 @@ make dashboard-run
 | `make migrate-up` | Apply database migrations |
 | `make dashboard-deploy` | Build and start the dashboard container |
 | `make dashboard-run` | Run the dashboard locally with Go |
+| `make swagger-gen` | Regenerate Swagger documentation from Go annotations |
 | `make postgres-port-forward` | Expose PostgreSQL on `127.0.0.1:5432` |
 | `make redis-port-forward` | Expose Redis on `127.0.0.1:6379` |
 | `make ps` | Show Compose service status |
@@ -124,7 +137,7 @@ The application reads these settings from the environment. Docker Compose and th
 | --- | --- |
 | `HTTP_ADDR` | Address for the HTTP server; `.env.example` uses `:8081` |
 | `HTTP_SHUTDOWN_TIMEOUT` | Graceful shutdown timeout |
-| `HTTP_ALLOWED_ORIGINS` | Allowed origins for CORS |
+| `HTTP_ALLOWED_ORIGINS` | Comma-separated allowed origins for CORS, including scheme and port |
 | `POSTGRES_HOST`, `POSTGRES_PORT` | PostgreSQL host and port; port defaults to `5432` |
 | `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | PostgreSQL credentials and database |
 | `POSTGRES_TIMEOUT` | PostgreSQL operation timeout |
@@ -158,7 +171,7 @@ internal/features/      Forecast, favorites, and web features
 migrations/             PostgreSQL schema migrations
 public/templates/       Go HTML templates
 public/static/          Styles and weather icons
-docs/screenshots/       README screenshots
+docs/                   Generated Swagger specification and README screenshots
 ```
 
 ## Checks

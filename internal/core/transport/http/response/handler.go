@@ -32,6 +32,7 @@ func (h *HTTPResponseHandler) JSONResponse(
 	responseBody any,
 	statusCode int,
 ) {
+	h.w.Header().Set("Content-type", "application/json")
 	h.w.WriteHeader(statusCode)
 
 	if err := json.NewEncoder(h.w).Encode(responseBody); err != nil {
@@ -110,6 +111,8 @@ func (h *HTTPResponseHandler) RenderPartHTML(data any, file string) error {
 		return fmt.Errorf("возникла ошибка парсинга во время шаблонизации страницы")
 	}
 
+	h.w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
 	err = tmpl.ExecuteTemplate(h.w, file, data)
 	if err != nil {
 		slog.Warn(fmt.Sprintf("ошибка шаблонизации страницы %v", err.Error()))
@@ -133,6 +136,8 @@ func (h *HTTPResponseHandler) RenderHTML(data any, file []string) error {
 	if err != nil {
 		return fmt.Errorf("template parse files: %w", err)
 	}
+
+	h.w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	if err := tmpl.Execute(h.w, data); err != nil {
 		return fmt.Errorf("template execute: %w", err)

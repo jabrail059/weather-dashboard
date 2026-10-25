@@ -10,6 +10,20 @@ import (
 	core_http_response "github.com/jabrail059/weather-dashboard/internal/core/transport/http/response"
 )
 
+// GetHourlyForecast 	godoc
+// @Summary 			Получить почасовой прогноз
+// @Description 		Получить данные о почасовом прогнозе погоды на день
+// @Tags 				forecast
+// @Produce 			html,json
+// @Param 				date 			query 		string 			true 				"Дата прогноза погоды, формат: YYYY-MM-DD" Format(date)
+// @Param 				city 			query 		string 			true 				"Название населенного пункта"
+// @Param 				sunrise 		query 		string 			true 				"Время восхода солнца, формат: HH:mm"
+// @Param 				sunset 			query 		string 			true 				"Время закат солнца, формат: HH:mm"
+// @Success 			200 			{string} 	string 								"HTML hourly forecast page"
+// @Failure 			400 			{object} 	core_http_response.ErrorResponse 	"Bad Request"
+// @Failure 			404 			{object} 	core_http_response.ErrorResponse 	"Not Found"
+// @Failure 			500 			{object} 	core_http_response.ErrorResponse 	"Internal Server Error"
+// @Router 				/weather/hourly [get]
 func (h *ForecastHTTPHandler) GetHourlyForecast(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := core_logger.FromContext(ctx)

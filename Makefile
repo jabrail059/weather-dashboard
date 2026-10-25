@@ -80,7 +80,13 @@ dashboard-deploy:
 dashboard-undeploy:
 	@docker compose down dashboard
 
+swagger-gen:
+	@docker compose run --rm swagger-gen \
+		init \
+		-g cmd/dashboard/main.go \
+		-o docs \
+		--parseInternal \
+		--parseDependency
+
 ps:
 	@docker compose ps
-
-
